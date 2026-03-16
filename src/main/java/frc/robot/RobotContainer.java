@@ -64,6 +64,7 @@ public class RobotContainer {
     private final TestIntake intake;
     private final TestHang hang;
     private final TestHopper hopper;
+    private final CommandPS5Controller joystick2 = new CommandPS5Controller(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -82,6 +83,9 @@ public class RobotContainer {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         // pdh.setSwitchableChannel(true);
+        hang.setDefaultCommand(
+                hang.runTake(() -> joystick2.getLeftY()));
+
         fly.setDefaultCommand(fly.runTakeOnce(0));
         hopper.setDefaultCommand(
                 hopper.runTake(() -> 0));
