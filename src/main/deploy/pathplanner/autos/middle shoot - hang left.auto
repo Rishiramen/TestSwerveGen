@@ -1,0 +1,68 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Mid to shoot-hang"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "prime hang"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "run shooter"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "start transfer"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "shoot to hang-left"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "deploy hang"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Mid autos",
+  "choreoAuto": false
+}
