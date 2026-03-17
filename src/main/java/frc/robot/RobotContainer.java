@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
@@ -35,10 +36,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.TestFly;
-import frc.robot.subsystems.TestHang;
-import frc.robot.subsystems.TestHopper;
-import frc.robot.subsystems.TestIntake;
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.ClimberSubsystem;
+import frc.robot.subsystems.HopperSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 
 public class RobotContainer {
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
@@ -60,19 +61,19 @@ public class RobotContainer {
     private Translation3d goalPose3d = new Translation3d(0, 0, 0);
 
     public final CommandPS5Controller joystick = new CommandPS5Controller(0);
-    private final TestFly fly;
-    private final TestIntake intake;
-    private final TestHang hang;
-    private final TestHopper hopper;
+    private final ShooterSubsystem shooterSubsystem;
+    private final IntakeSubsystem intakeSubsystem;
+    private final ClimberSubsystem climberSubsystem;
+    private final HopperSubsystem hopperSubsystem;
     private final CommandPS5Controller joystick2 = new CommandPS5Controller(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public RobotContainer() {
-        fly = new TestFly();
-        intake = new TestIntake();
-        hang = new TestHang();
-        hopper = new TestHopper();
+        shooterSubsystem = new ShooterSubsystem(drivetrain);
+        intakeSubsystem = new IntakeSubsystem();
+        climberSubsystem = new ClimberSubsystem();
+        hopperSubsystem = new HopperSubsystem();
 
         configureBindings();
         drivetrain.configNeutralMode(NeutralModeValue.Coast);
@@ -83,17 +84,22 @@ public class RobotContainer {
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         // pdh.setSwitchableChannel(true);
-        hang.setDefaultCommand(
-                hang.runTake(() -> joystick2.getLeftY()));
+        climberSubsystem.setDefaultCommand(
+                climberSubsystem.runTake(() -> joystick2.getLeftY()));
 
-        fly.setDefaultCommand(fly.runTakeOnce(0));
-        hopper.setDefaultCommand(
-                hopper.runTake(() -> 0));
+        hopperSubsystem.setDefaultCommand(
+                hopperSubsystem.runTake(() -> 0));
 
-        joystick.cross().toggleOnTrue(hopper.runTake(() -> -1).alongWith(fly.runTakeOnce(1)))
-                .toggleOnFalse(hopper.runTake(() -> 0).alongWith(fly.runTakeOnce(0)));
+        // joystick.cross().toggleOnTrue(hopper.runTake(() -> -1).alongWith(fly.runTakeOnce(1)))
+        //         .toggleOnFalse(hopper.runTake(() -> 0).alongWith(fly.runTakeOnce(0)));
 
-        intake.setDefaultCommand(intake.runTake(() -> joystick.getL2Axis() - joystick.getR2Axis()));
+
+        joystick.cross()
+                .onTrue(shooterSubsystem.feed().alongWith(intakeSubsystem.runBackward().alongWith(hopperSubsystem.runBackward())))
+                .onFalse(shooterSubsystem.stopFeed().alongWith(intakeSubsystem.stop()).alongWith(hopperSubsystem.stop()));
+
+
+        intakeSubsystem.setDefaultCommand(intakeSubsystem.runTake(() -> joystick.getL2Axis() - joystick.getR2Axis()));
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
                 drivetrain.applyRequest(
