@@ -31,8 +31,8 @@ public class Robot extends TimedRobot {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
 
-        var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-        if (llMeasurement != null && llMeasurement.tagCount > 0
+        var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-back");
+        if (llMeasurement != null
                 && Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0) {
             m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, kDefaultPeriod);
         }
@@ -40,6 +40,11 @@ public class Robot extends TimedRobot {
         SmartDashboard.putNumber("Left y", m_robotContainer.joystick.getLeftY());
         SmartDashboard.putNumber("Left x", m_robotContainer.joystick.getLeftX());
         SmartDashboard.putNumber("right x", m_robotContainer.joystick.getRightX());
+        SmartDashboard.putNumber("ll tag count", llMeasurement.tagCount);
+        boolean[] boolArr = { llMeasurement != null, llMeasurement.tagCount > 0,
+                Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0 };
+
+        SmartDashboard.putBooleanArray("ll mount", boolArr);
     }
 
     @Override
