@@ -59,7 +59,7 @@ public class RobotContainer {
 
     private Translation3d goalPose3d = new Translation3d(0, 0, 0);
 
-    private final CommandPS5Controller joystick = new CommandPS5Controller(0);
+    public final CommandPS5Controller joystick = new CommandPS5Controller(0);
     private final TestFly fly;
     private final TestIntake intake;
     private final TestHang hang;
@@ -96,12 +96,21 @@ public class RobotContainer {
         intake.setDefaultCommand(intake.runTake(() -> joystick.getL2Axis() - joystick.getR2Axis()));
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
-                                                                                                   // negative Y
-                                                                                                   // (forward)
-                        .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with
-                                                                                    // negative X (left)
+                drivetrain.applyRequest(
+                        () -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed).withDeadband(0.3 * MaxSpeed) // Drive
+                                // forward
+                                // with
+                                // negative Y
+                                // (forward)
+                                .withVelocityY(-joystick.getLeftX() * MaxSpeed).withDeadband(0.3 * MaxSpeed) // Drive
+                                                                                                             // left
+                                                                                                             // with
+                                                                                                             // negative
+                                                                                                             // X
+                                // (left)
+                                .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise
+                                                                                            // with
+                                                                                            // negative X (left)
                 ));
         joystick.R1().whileTrue(drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive
                                                                                                                    // forward
