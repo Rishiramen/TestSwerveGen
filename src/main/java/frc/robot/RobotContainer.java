@@ -106,12 +106,12 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed).withDeadband(0.3 * MaxSpeed) // Drive
+                        () -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed).withDeadband(0.1 * MaxSpeed) // Drive
                                 // forward
                                 // with
                                 // negative Y
                                 // (forward)
-                                .withVelocityY(-joystick.getLeftX() * MaxSpeed).withDeadband(0.3 * MaxSpeed) // Drive
+                                .withVelocityY(-joystick.getLeftX() * MaxSpeed).withDeadband(0.1 * MaxSpeed) // Drive
                                                                                                              // left
                                                                                                              // with
                                                                                                              // negative

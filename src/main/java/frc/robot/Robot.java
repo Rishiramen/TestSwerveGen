@@ -32,10 +32,11 @@ public class Robot extends TimedRobot {
         CommandScheduler.getInstance().run();
 
         var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-back");
-        if (llMeasurement != null
+        if (llMeasurement != null && llMeasurement.tagCount>0
                 && Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0) {
-            m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, kDefaultPeriod);
+            m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
         }
+        
 
         SmartDashboard.putNumber("Left y", m_robotContainer.joystick.getLeftY());
         SmartDashboard.putNumber("Left x", m_robotContainer.joystick.getLeftX());
