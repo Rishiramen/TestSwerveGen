@@ -269,7 +269,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         Pose2d smth = this.getStateCopy().Pose;
         Angle autoAlignTargetAngle = Angle
-                .ofRelativeUnits(Math.atan2(-(goalPose3d.getY() - smth.getY()), -(goalPose3d.getX() - smth.getX())),
+                .ofRelativeUnits(Math.atan2((goalPose3d.getY() - smth.getY()), (goalPose3d.getX() - smth.getX())),
                         Radian);
         return wrapAngle(autoAlignTargetAngle.minus(this.getStateCopy().Pose.getRotation().getMeasure()));
 
