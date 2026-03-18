@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.LimelightHelpers;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -46,6 +47,7 @@ public class Robot extends TimedRobot {
                 Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0 };
 
         SmartDashboard.putBooleanArray("ll mount", boolArr);
+        SmartDashboard.putNumber("dist from goal",(m_robotContainer.drivetrain.getStateCopy().Pose.getTranslation().getDistance(CommandSwerveDrivetrain.goalPose2d)) );
     }
 
     @Override

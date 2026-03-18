@@ -14,6 +14,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -84,6 +85,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     null,
                     this));
 
+    
+
     /*
      * SysId routine for characterizing rotation.
      * This is used to find PID gains for the FieldCentricFacingAngle
@@ -110,6 +113,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     null,
                     this));
 
+
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
@@ -132,6 +136,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+
+        // this.setOperatorPerspectiveForward((DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
+        //         ? kRedAlliancePerspectiveRotation:kBlueAlliancePerspectiveRotation   );
+        
+        goalPose2d = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
+                ? redGoal
+                : blueGoal;
+
     }
 
     /**
@@ -255,21 +267,23 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
     }
+    private final Translation2d blueGoal = new Translation2d(4.03 + Meter.convertFrom(47 / 2, Inch), 8.07 / 2
+                );
+
+    private final Translation2d redGoal = new Translation2d(16.513 - 4.03 - Meter.convertFrom(47 / 2, Inch), 8.07 / 2
+                );
+
+    public static Translation2d goalPose2d = new Translation2d(0,0);
 
     public Angle getAutoAlignRotationalError() {
-        Translation3d blueGoal = new Translation3d(4.03 + Meter.convertFrom(47 / 2, Inch), 8.07 / 2,
-                Meter.convertFrom(72, Inch));
-
-        Translation3d redGoal = new Translation3d(16.513 - 4.03 - Meter.convertFrom(47 / 2, Inch), 8.07 / 2,
-                Meter.convertFrom(72, Inch));
-
-        Translation3d goalPose3d = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
+        
+        goalPose2d = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
                 ? redGoal
                 : blueGoal;
 
         Pose2d smth = this.getStateCopy().Pose;
         Angle autoAlignTargetAngle = Angle
-                .ofRelativeUnits(Math.atan2((goalPose3d.getY() - smth.getY()), (goalPose3d.getX() - smth.getX())),
+                .ofRelativeUnits(Math.atan2((goalPose2d.getY() - smth.getY()), (goalPose2d.getX() - smth.getX())),
                         Radian);
         return wrapAngle(autoAlignTargetAngle.minus(this.getStateCopy().Pose.getRotation().getMeasure()));
 

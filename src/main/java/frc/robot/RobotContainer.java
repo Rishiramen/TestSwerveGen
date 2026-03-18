@@ -63,65 +63,79 @@ public class RobotContainer {
 
         private Translation3d goalPose3d = new Translation3d(0, 0, 0);
 
-    public final CommandPS5Controller joystick = new CommandPS5Controller(0);
-    private final ShooterSubsystem shooterSubsystem;
-    private final IntakeSubsystem intakeSubsystem;
-    private final ClimberSubsystem climberSubsystem;
-    private final HopperSubsystem hopperSubsystem;
-    private final CommandPS5Controller joystick2 = new CommandPS5Controller(1);
+        public final CommandPS5Controller joystick = new CommandPS5Controller(0);
+        private final ShooterSubsystem shooterSubsystem;
+        private final IntakeSubsystem intakeSubsystem;
+        private final ClimberSubsystem climberSubsystem;
+        private final HopperSubsystem hopperSubsystem;
+        private final CommandPS5Controller joystick2 = new CommandPS5Controller(1);
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    public RobotContainer() {
-        shooterSubsystem = new ShooterSubsystem(drivetrain);
-        intakeSubsystem = new IntakeSubsystem();
-        climberSubsystem = new ClimberSubsystem();
-        hopperSubsystem = new HopperSubsystem();
+        public RobotContainer() {
+                shooterSubsystem = new ShooterSubsystem(drivetrain);
+                intakeSubsystem = new IntakeSubsystem();
+                climberSubsystem = new ClimberSubsystem();
+                hopperSubsystem = new HopperSubsystem();
 
                 configureBindings();
                 drivetrain.configNeutralMode(NeutralModeValue.Coast);
 
+                drivetrain.registerTelemetry(logger::telemeterize);
         }
 
-    private void configureBindings() {
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
-        // pdh.setSwitchableChannel(true);
-        climberSubsystem.setDefaultCommand(
-                climberSubsystem.runTake(() -> joystick2.getLeftY()));
+        private void configureBindings() {
+                // Note that X is defined as forward according to WPILib convention,
+                // and Y is defined as to the left according to WPILib convention.
+                // pdh.setSwitchableChannel(true);
+                climberSubsystem.setDefaultCommand(
+                                climberSubsystem.runTake(() -> joystick2.getLeftY()));
 
-        hopperSubsystem.setDefaultCommand(
-                hopperSubsystem.runTake(() -> 0));
+                hopperSubsystem.setDefaultCommand(
+                                hopperSubsystem.runTake(() -> 0));
 
-        // joystick.cross().toggleOnTrue(hopper.runTake(() -> -1).alongWith(fly.runTakeOnce(1)))
-        //         .toggleOnFalse(hopper.runTake(() -> 0).alongWith(fly.runTakeOnce(0)));
+                // joystick.cross().toggleOnTrue(hopper.runTake(() ->
+                // -1).alongWith(fly.runTakeOnce(1)))
+                // .toggleOnFalse(hopper.runTake(() -> 0).alongWith(fly.runTakeOnce(0)));
 
+                joystick.cross()
+                                .onTrue(shooterSubsystem.feed().alongWith(
+                                                intakeSubsystem.runBackward().alongWith(hopperSubsystem.runBackward())))
+                                .onFalse(shooterSubsystem.stopFeed().alongWith(intakeSubsystem.stop())
+                                                .alongWith(hopperSubsystem.stop()));
 
-        joystick.cross()
-                .onTrue(shooterSubsystem.feed().alongWith(intakeSubsystem.runBackward().alongWith(hopperSubsystem.runBackward())))
-                .onFalse(shooterSubsystem.stopFeed().alongWith(intakeSubsystem.stop()).alongWith(hopperSubsystem.stop()));
-
-
-        intakeSubsystem.setDefaultCommand(intakeSubsystem.runTake(() -> joystick.getL2Axis() - joystick.getR2Axis()));
-        drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(
-                        () -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed).withDeadband(0.1 * MaxSpeed) // Drive
-                                // forward
-                                // with
-                                // negative Y
-                                // (forward)
-                                .withVelocityY(-joystick.getLeftX() * MaxSpeed).withDeadband(0.1 * MaxSpeed) // Drive
-                                                                                                             // left
-                                                                                                             // with
-                                                                                                             // negative
-                                                                                                             // X
-                                // (left)
-                                .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise
-                                                                                            // with
-                                                                                            // negative X (left)
-                ));
-        joystick.R1().whileTrue(drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive
+                intakeSubsystem.setDefaultCommand(
+                                intakeSubsystem.runTake(() -> joystick.getL2Axis() - joystick.getR2Axis()));
+                joystick.triangle().onTrue(intakeSubsystem.rezero());
+                joystick.povUp().onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED));
+                joystick.povDown().onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED));
+                
+                drivetrain.setDefaultCommand(
+                                // Drivetrain will execute this command periodically
+                                drivetrain.applyRequest(
+                                                () -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed)
+                                                                .withDeadband(0.1 * MaxSpeed) // Drive
+                                                                // forward
+                                                                // with
+                                                                // negative Y
+                                                                // (forward)
+                                                                .withVelocityY(-joystick.getLeftX() * MaxSpeed)
+                                                                .withDeadband(0.1 * MaxSpeed) // Drive
+                                                                                              // left
+                                                                                              // with
+                                                                                              // negative
+                                                                                              // X
+                                                                // (left)
+                                                                .withRotationalRate(
+                                                                                -joystick.getRightX() * MaxAngularRate) // Drive
+                                                                                                                        // counterclockwise
+                                                                                                                        // with
+                                                                                                                        // negative
+                                                                                                                        // X
+                                                                                                                        // (left)
+                                ));
+                joystick.R1().whileTrue(
+                                drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive
                                                                                                                    // forward
                                                                                                                    // with
                                                 // negative Y
@@ -157,8 +171,6 @@ public class RobotContainer {
 
                 // Reset the field-centric heading on left bumper press.
                 joystick.L1().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-
-                drivetrain.registerTelemetry(logger::telemeterize);
         }
 
         public Command getAutonomousCommand() {
