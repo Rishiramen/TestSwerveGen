@@ -40,20 +40,20 @@ public class HopperSubsystem extends SubsystemBase {
     }
 
     public Command runForward() {
-        return run(() -> runRaw(0.5));
+        return runOnce(() -> runRaw(0.5));
     }
 
     public Command runBackward() {
-        return run(() -> runRaw(-0.5));
+        return runOnce(() -> runRaw(-1));
     }
 
     public Command stop()
     {
-        return run(() -> {this.runRaw(0.0);});
+        return runOnce(() -> {this.runRaw(0.0);});
     }
 
     public Command runTake(DoubleSupplier power) {
-        return run(() -> runRaw(power.getAsDouble()));
+        return runOnce(() -> runRaw(power.getAsDouble()));
     }
 
     public void runRaw(double power) {

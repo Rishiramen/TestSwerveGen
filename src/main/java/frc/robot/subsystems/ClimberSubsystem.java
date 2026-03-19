@@ -54,7 +54,7 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public Command runTake(DoubleSupplier power) {
-        return run(() -> runTakeRaw(power.getAsDouble()));
+        return runOnce(() -> runTakeRaw(power.getAsDouble()));
     }
 
     public Command runIntake(DoubleSupplier power) {

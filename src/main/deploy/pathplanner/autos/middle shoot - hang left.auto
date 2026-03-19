@@ -23,7 +23,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "run shooter"
+                  "name": "stow intake"
                 }
               }
             ]
@@ -32,13 +32,51 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0
+            "waitTime": 2.0
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "start transfer"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "start kicker"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "start hopper"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop hopper"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop kicker"
+                }
+              }
+            ]
           }
         },
         {
@@ -50,7 +88,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.0
+            "waitTime": 1.0
           }
         },
         {

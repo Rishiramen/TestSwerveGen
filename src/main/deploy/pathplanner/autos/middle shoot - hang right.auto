@@ -19,12 +19,6 @@
                 "data": {
                   "name": "prime hang"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "run shooter"
-                }
               }
             ]
           }
@@ -38,7 +32,7 @@
         {
           "type": "named",
           "data": {
-            "name": "start transfer"
+            "name": "start hopper"
           }
         },
         {

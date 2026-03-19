@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.ctre.phoenix6.HootAutoReplay;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,12 +36,14 @@ public class Robot extends TimedRobot {
         var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-back");
         if (llMeasurement != null && llMeasurement.tagCount>0
                 && Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0) {
-            m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
+            // m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
         }
         
 
         SmartDashboard.putNumber("Left y", m_robotContainer.joystick.getLeftY());
         SmartDashboard.putNumber("Left x", m_robotContainer.joystick.getLeftX());
+        SmartDashboard.putNumber("Left trig", m_robotContainer.joystick.getL2Axis());
+        SmartDashboard.putNumber("Right trig", m_robotContainer.joystick.getR2Axis());
         SmartDashboard.putNumber("right x", m_robotContainer.joystick.getRightX());
         SmartDashboard.putNumber("ll tag count", llMeasurement.tagCount);
         boolean[] boolArr = { llMeasurement != null, llMeasurement.tagCount > 0,
@@ -60,6 +63,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledExit() {
+            m_robotContainer.drivetrain.configNeutralMode(NeutralModeValue.Coast);
+
     }
 
     @Override

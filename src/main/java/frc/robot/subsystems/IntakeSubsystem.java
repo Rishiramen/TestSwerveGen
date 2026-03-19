@@ -88,6 +88,9 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command rezero(){
         return runOnce(() -> pivot.setPosition(START_HORIZONTAL_OFFSET.div(WRIST_RATIO)));
     }
+    public Command rezero(boolean down){
+        return runOnce(() -> pivot.setPosition(State.DEPLOYED.angle.div(WRIST_RATIO)));
+    }
 
 
     public Command runTo(){
@@ -120,7 +123,7 @@ public class IntakeSubsystem extends SubsystemBase {
                         .withStatorCurrentLimit(30))
                 .withMotorOutput(new MotorOutputConfigs()
                         .withInverted(InvertedValue.CounterClockwise_Positive)
-                        .withNeutralMode(NeutralModeValue.Coast));
+                        .withNeutralMode(NeutralModeValue.Brake));
 
         configArm.Slot0.kP = 0.3; // start small, tune up
         configArm.Slot0.kI = 0.0;
@@ -157,37 +160,27 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public Command runForward() {
-        return run(() -> runRaw(0.5));
+        return runOnce(() -> runRaw(0.5));
     }
 
     public Command runBackward() {
-        return run(() -> runRaw(-0.5));
+        return runOnce(() -> runRaw(-0.5));
     }
 
     public Command stop() {
-        return run(() -> runRaw(0.0));
+        return runOnce(() -> runRaw(0.0));
     }
 
     public Command runTake(DoubleSupplier power) {
-        return run(() -> runRaw(power.getAsDouble()));
+        return runOnce(() -> runRaw(power.getAsDouble()));
     }
 
-    public Command runPivot(DoubleSupplier power) {
-        return run(() -> runPivotRaw(power.getAsDouble()));
-    }
 
     public void runRaw(double power) {
         take.set(power);
     }
 
-    public void runPivotRaw(double power) {
-        pivot.set(power);
-    }
-
-    public Command runIntakeOnce(double power) {
-        return runOnce(() -> runRaw(power));
-    }
-
+   
     
 
 }

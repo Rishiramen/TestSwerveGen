@@ -9,6 +9,9 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -22,20 +25,30 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.LimelightHelpers;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.FeederSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.HopperSubsystem;
@@ -67,19 +80,56 @@ public class RobotContainer {
         private final ShooterSubsystem shooterSubsystem;
         private final IntakeSubsystem intakeSubsystem;
         private final ClimberSubsystem climberSubsystem;
+        private final FeederSubsystem feederSubsystem;
         private final HopperSubsystem hopperSubsystem;
         private final CommandPS5Controller joystick2 = new CommandPS5Controller(1);
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+        private final SendableChooser<Command> autoChooser;
+
 
         public RobotContainer() {
                 shooterSubsystem = new ShooterSubsystem(drivetrain);
                 intakeSubsystem = new IntakeSubsystem();
+                feederSubsystem = new FeederSubsystem();
                 climberSubsystem = new ClimberSubsystem();
                 hopperSubsystem = new HopperSubsystem();
 
+                hopperSubsystem.setDefaultCommand(hopperSubsystem.stop());
+                feederSubsystem.setDefaultCommand(feederSubsystem.stop());
+
+                
+
+
+                boolean useShooter = true;
+                boolean useIntake = false;
+                boolean useHopper = true;
+                boolean useHang = true;
+
+
+                NamedCommands.registerCommand("prime hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(1)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
+
+                NamedCommands.registerCommand("start hopper", useHopper&&useShooter ? hopperSubsystem.runBackward() : new InstantCommand());
+                
+                NamedCommands.registerCommand("stop hopper", useHopper&&useShooter ? hopperSubsystem.stop() : new InstantCommand());
+                
+                NamedCommands.registerCommand("start kicker", useHopper&&useShooter ? feederSubsystem.runBackward() : new InstantCommand());
+
+                NamedCommands.registerCommand("stop kicker", useHopper&&useShooter ? feederSubsystem.stop() : new InstantCommand());
+
+                
+                NamedCommands.registerCommand("deploy hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(2)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
+
+                NamedCommands.registerCommand("stow intake", useIntake ? intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED) : new InstantCommand());
+                NamedCommands.registerCommand("deploy intake", useIntake ? intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED) : new InstantCommand());
+                
                 configureBindings();
-                drivetrain.configNeutralMode(NeutralModeValue.Coast);
+
+                
+                
+                autoChooser = AutoBuilder.buildAutoChooser();
+                SmartDashboard.putData("Auto Mode", autoChooser);
+
 
                 drivetrain.registerTelemetry(logger::telemeterize);
         }
@@ -91,24 +141,45 @@ public class RobotContainer {
                 climberSubsystem.setDefaultCommand(
                                 climberSubsystem.runTake(() -> joystick2.getLeftY()));
 
+                // hopperSubsystem.setDefaultCommand(
+                //                 hopperSubsystem.runTake(() -> joystick.getRightY() + joystick2.getRightY() ));
+                // intakeSubsystem.setDefaultCommand(
+                //                 intakeSubsystem.runTake(() -> joystick.getRightY()+joystick2.getRightY() ));
+
+                
                 hopperSubsystem.setDefaultCommand(
-                                hopperSubsystem.runTake(() -> 0));
+                                hopperSubsystem.runTake(() -> (joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2 ));
+                intakeSubsystem.setDefaultCommand(
+                                intakeSubsystem.runTake(() -> ((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2 )*.4 ));
+                new Trigger(() ->  ((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2)>.01 )
+                        .onTrue(
+                                feederSubsystem.runForward()
+                        );
+                
+
+                                // joystick.axisMagnitudeGreaterThan(PS5Controller.Axis.kL2.value, .01).onTrue(intakeSubsystem.runForward()).onFalse(intakeSubsystem.stop());
+                // joystick.axisMagnitudeGreaterThan(PS5Controller.Axis.kR2.value, .01).onTrue(intakeSubsystem.runBackward().alongWith(hopperSubsystem.runBackward()))
+                //         .onFalse(intakeSubsystem.stop().alongWith(hopperSubsystem.stop()));
+
+
 
                 // joystick.cross().toggleOnTrue(hopper.runTake(() ->
                 // -1).alongWith(fly.runTakeOnce(1)))
                 // .toggleOnFalse(hopper.runTake(() -> 0).alongWith(fly.runTakeOnce(0)));
 
                 joystick.cross()
-                                .onTrue(shooterSubsystem.feed().alongWith(
+                                .onTrue(feederSubsystem.runBackward().alongWith(
                                                 intakeSubsystem.runBackward().alongWith(hopperSubsystem.runBackward())))
-                                .onFalse(shooterSubsystem.stopFeed().alongWith(intakeSubsystem.stop())
+                                .onFalse(feederSubsystem.stop().alongWith(intakeSubsystem.stop())
                                                 .alongWith(hopperSubsystem.stop()));
 
-                intakeSubsystem.setDefaultCommand(
-                                intakeSubsystem.runTake(() -> joystick.getL2Axis() - joystick.getR2Axis()));
-                joystick.triangle().onTrue(intakeSubsystem.rezero());
-                joystick.povUp().onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED));
-                joystick.povDown().onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED));
+                joystick.triangle().or(joystick2.triangle()).onTrue(intakeSubsystem.rezero());
+                joystick2.circle().onTrue(intakeSubsystem.rezero(true));
+                joystick.povUp().or(joystick2.povUp()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED));
+                joystick.povDown().or(joystick2.povDown()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED));
+                
+                
+                
                 
                 drivetrain.setDefaultCommand(
                                 // Drivetrain will execute this command periodically
@@ -175,17 +246,6 @@ public class RobotContainer {
 
         public Command getAutonomousCommand() {
                 // Simple drive forward auton
-                final var idle = new SwerveRequest.Idle();
-                return Commands.sequence(
-                                // Reset our field centric heading to match the robot
-                                // facing away from our alliance station wall (0 deg).
-                                drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
-                                // Then slowly drive forward (away from us) for 5 seconds.
-                                drivetrain.applyRequest(() -> drive.withVelocityX(0.5)
-                                                .withVelocityY(0)
-                                                .withRotationalRate(0))
-                                                .withTimeout(5.0),
-                                // Finally idle for the rest of auton
-                                drivetrain.applyRequest(() -> idle));
+                return autoChooser.getSelected();
         }
 }

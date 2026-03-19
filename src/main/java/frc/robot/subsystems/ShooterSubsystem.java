@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -21,10 +22,12 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Constants;
 
 public class ShooterSubsystem extends SubsystemBase {
-    private TalonFX leftShooter, rightShooter, feeder;
+    private TalonFX leftShooter, rightShooter;
     private bangbangCommand bang;
     private double targetRPM = 0.0;
     private CommandSwerveDrivetrain drivetrain;
@@ -32,7 +35,6 @@ public class ShooterSubsystem extends SubsystemBase {
     public ShooterSubsystem(CommandSwerveDrivetrain drivetrain) {
         leftShooter = new TalonFX(30);
         rightShooter = new TalonFX(31);
-        feeder = new TalonFX(32);
 
         this.drivetrain = drivetrain;
 
@@ -43,19 +45,14 @@ public class ShooterSubsystem extends SubsystemBase {
                 .withMotorOutput(new MotorOutputConfigs()
                         .withInverted(InvertedValue.Clockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Coast));
-        TalonFXConfiguration tr = new TalonFXConfiguration()
-                .withCurrentLimits(new CurrentLimitsConfigs()
-                        .withSupplyCurrentLimit(25)
-                        .withStatorCurrentLimit(25))
-                .withMotorOutput(new MotorOutputConfigs()
-                        .withInverted(InvertedValue.CounterClockwise_Positive)
-                        .withNeutralMode(NeutralModeValue.Coast));
-
+        
         leftShooter.getConfigurator().apply(shooter);
         rightShooter.getConfigurator().apply(shooter);
         rightShooter.setControl(new Follower(30, MotorAlignmentValue.Opposed));
 
-        feeder.getConfigurator().apply(tr);
+
+
+
 
         bang = new bangbangCommand(50);
         this.setDefaultCommand(bang);
@@ -78,36 +75,11 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("left shooter power", leftShooter.getDutyCycle().getValueAsDouble());
         SmartDashboard.putNumber("left shooter RPM", this.getShooterVelocity().in(RPM));
 
-        targetRPM = SmartDashboard.getNumber("targetRPM", 0.0);
+        targetRPM = Constants.getRPM(drivetrain.getDistFromGoal().in(Meter));
 
     }
 
-    public Command reverseFeed()
-    {
-        return runOnce(() -> {
-            this.openLoopFeeder(-1.0);
-        });
-    }
-
-    public Command feed()
-    {
-        return new InstantCommand(() -> {
-            this.openLoopFeeder(1.0);
-        });
-    }
-
-    public Command stopFeed()
-    {
-        return new InstantCommand(() -> {
-            this.openLoopFeeder(0.0);
-        });
-    }
-
-    private void openLoopFeeder(double power)
-    {
-        feeder.set(power);
-    }
-
+    
     private void openLoopShooter(double power)
     {
         leftShooter.set(power);
