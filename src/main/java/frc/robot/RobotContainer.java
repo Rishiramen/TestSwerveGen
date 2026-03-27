@@ -6,6 +6,9 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -13,6 +16,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.util.FlippingUtil;
 
+import dev.doglog.DogLog;
+import dev.doglog.DogLogOptions;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -86,17 +91,52 @@ public class RobotContainer {
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
         private final SendableChooser<Command> autoChooser;
+        private double speedMult =1;
 
 
         public RobotContainer() {
+                DogLog.setOptions(new DogLogOptions().withCaptureDs(true));
                 shooterSubsystem = new ShooterSubsystem(drivetrain);
                 intakeSubsystem = new IntakeSubsystem();
                 feederSubsystem = new FeederSubsystem();
                 climberSubsystem = new ClimberSubsystem();
                 hopperSubsystem = new HopperSubsystem();
 
-                hopperSubsystem.setDefaultCommand(hopperSubsystem.stop());
                 feederSubsystem.setDefaultCommand(feederSubsystem.stop());
+
+                intakeSubsystem.setDefaultCommand(
+                                intakeSubsystem.runTake()
+                                );
+                hopperSubsystem.setDefaultCommand(
+                                hopperSubsystem.runTake(() -> ((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2 )*.0 ));
+                
+                climberSubsystem.setDefaultCommand(
+                                climberSubsystem.runTake(() -> joystick2.getLeftY()));
+                drivetrain.setDefaultCommand(
+                                // Drivetrain will execute this command periodically
+                                drivetrain.applyRequest(
+                                                () -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed*speedMult)
+                                                                .withDeadband(0.1 * MaxSpeed*speedMult) // Drive
+                                                                // forward
+                                                                // with
+                                                                // negative Y
+                                                                // (forward)
+                                                                .withVelocityY(-joystick.getLeftX() * MaxSpeed*speedMult)
+                                                                .withDeadband(0.1 * MaxSpeed*speedMult) // Drive
+                                                                                              // left
+                                                                                              // with
+                                                                                              // negative
+                                                                                              // X
+                                                                // (left)
+                                                                .withRotationalRate(
+                                                                                -joystick.getRightX() * MaxAngularRate*speedMult*.95) // Drive
+                                                                                                                        // counterclockwise
+                                                                                                                        // with
+                                                                                                                        // negative
+                                                                                                                        // X
+                                                                                                                        // (left)
+                                ));
+                
 
                 
 
@@ -109,13 +149,13 @@ public class RobotContainer {
 
                 NamedCommands.registerCommand("prime hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(1)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
 
-                NamedCommands.registerCommand("start hopper", useHopper&&useShooter ? hopperSubsystem.runBackward() : new InstantCommand());
+                NamedCommands.registerCommand("start hopper", useHopper&&useShooter ? hopperSubsystem.runBackward().raceWith(new WaitCommand(4)) : new InstantCommand());
                 
-                NamedCommands.registerCommand("stop hopper", useHopper&&useShooter ? hopperSubsystem.stop() : new InstantCommand());
+                NamedCommands.registerCommand("stop hopper", useHopper&&useShooter ? hopperSubsystem.stop().raceWith(new WaitCommand(.1)) : new InstantCommand());
                 
-                NamedCommands.registerCommand("start kicker", useHopper&&useShooter ? feederSubsystem.runBackward() : new InstantCommand());
+                NamedCommands.registerCommand("start kicker", useHopper&&useShooter ? feederSubsystem.runBackward().raceWith(new WaitCommand(4)) : new InstantCommand());
 
-                NamedCommands.registerCommand("stop kicker", useHopper&&useShooter ? feederSubsystem.stop() : new InstantCommand());
+                NamedCommands.registerCommand("stop kicker", useHopper&&useShooter ? feederSubsystem.stop().raceWith(new WaitCommand(.1)) : new InstantCommand());
 
                 
                 NamedCommands.registerCommand("deploy hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(2)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
@@ -138,23 +178,17 @@ public class RobotContainer {
                 // Note that X is defined as forward according to WPILib convention,
                 // and Y is defined as to the left according to WPILib convention.
                 // pdh.setSwitchableChannel(true);
-                climberSubsystem.setDefaultCommand(
-                                climberSubsystem.runTake(() -> joystick2.getLeftY()));
-
+                
                 // hopperSubsystem.setDefaultCommand(
                 //                 hopperSubsystem.runTake(() -> joystick.getRightY() + joystick2.getRightY() ));
                 // intakeSubsystem.setDefaultCommand(
                 //                 intakeSubsystem.runTake(() -> joystick.getRightY()+joystick2.getRightY() ));
 
                 
-                hopperSubsystem.setDefaultCommand(
-                                hopperSubsystem.runTake(() -> (joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2 ));
-                intakeSubsystem.setDefaultCommand(
-                                intakeSubsystem.runTake(() -> ((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2 )*.4 ));
-                new Trigger(() ->  ((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2)>.01 )
-                        .onTrue(
-                                feederSubsystem.runForward()
-                        );
+                // new Trigger(() ->  Math.abs((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2) >.01 )
+                //         .onTrue(
+                //                 hopperSubsystem.runTake(() -> (joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2 )
+                //         );
                 
 
                                 // joystick.axisMagnitudeGreaterThan(PS5Controller.Axis.kL2.value, .01).onTrue(intakeSubsystem.runForward()).onFalse(intakeSubsystem.stop());
@@ -166,56 +200,47 @@ public class RobotContainer {
                 // joystick.cross().toggleOnTrue(hopper.runTake(() ->
                 // -1).alongWith(fly.runTakeOnce(1)))
                 // .toggleOnFalse(hopper.runTake(() -> 0).alongWith(fly.runTakeOnce(0)));
+                
 
                 joystick.cross()
-                                .onTrue(feederSubsystem.runBackward().alongWith(
-                                                intakeSubsystem.runBackward().alongWith(hopperSubsystem.runBackward())))
-                                .onFalse(feederSubsystem.stop().alongWith(intakeSubsystem.stop())
-                                                .alongWith(hopperSubsystem.stop()));
+                        .whileTrue(
+                                 feederSubsystem.runBackward()
+                                .alongWith(intakeSubsystem.runBackward())
+                                .alongWith(hopperSubsystem.runBackward())
+                        );
 
+                new Trigger(() -> Math.abs((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2)>.01 )
+                        .whileTrue(new InstantCommand(() -> speedMult=.3)
+                                .alongWith(feederSubsystem.runForward())
+                                .alongWith(new InstantCommand(() -> intakeSubsystem.updatePower(() -> (joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2)))
+                                )
+                        .whileFalse(new InstantCommand(() -> speedMult=1));
+                
+                
+                
+                // joystick.cross().whileTrue(feederSubsystem.runBackward());
+                
                 joystick.triangle().or(joystick2.triangle()).onTrue(intakeSubsystem.rezero());
                 joystick2.circle().onTrue(intakeSubsystem.rezero(true));
                 joystick.povUp().or(joystick2.povUp()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED));
                 joystick.povDown().or(joystick2.povDown()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED));
+
+                joystick2.square().onTrue(new InstantCommand(shooterSubsystem::switchFixed));
                 
                 
                 
                 
-                drivetrain.setDefaultCommand(
-                                // Drivetrain will execute this command periodically
-                                drivetrain.applyRequest(
-                                                () -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed)
-                                                                .withDeadband(0.1 * MaxSpeed) // Drive
-                                                                // forward
-                                                                // with
-                                                                // negative Y
-                                                                // (forward)
-                                                                .withVelocityY(-joystick.getLeftX() * MaxSpeed)
-                                                                .withDeadband(0.1 * MaxSpeed) // Drive
-                                                                                              // left
-                                                                                              // with
-                                                                                              // negative
-                                                                                              // X
-                                                                // (left)
-                                                                .withRotationalRate(
-                                                                                -joystick.getRightX() * MaxAngularRate) // Drive
-                                                                                                                        // counterclockwise
-                                                                                                                        // with
-                                                                                                                        // negative
-                                                                                                                        // X
-                                                                                                                        // (left)
-                                ));
                 joystick.R1().whileTrue(
-                                drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive
+                                drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed*speedMult) // Drive
                                                                                                                    // forward
                                                                                                                    // with
                                                 // negative Y
                                                 // (forward)
-                                                .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with
+                                                .withVelocityY(-joystick.getLeftX() * MaxSpeed*speedMult) // Drive left with
                                                                                                 // negative X (left)
                                                 .withRotationalRate(
                                                                 (drivetrain.getAutoAlignRotationalError().in(Degree))
-                                                                                * .02 * MaxAngularRate) // Drive
+                                                                                * .05 * MaxAngularRate) // Drive
                                                                                                         // counterclockwise
                                                                                                         // with
                                 // negative X (left)
@@ -235,6 +260,7 @@ public class RobotContainer {
 
                 // Run SysId routines when holding back/start and X/Y.
                 // Note that each routine should be run exactly once in a single log.
+                
                 joystick.create().and(joystick.triangle()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
                 joystick.create().and(joystick.square()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
                 joystick.options().and(joystick.triangle()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));

@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.HootAutoReplay;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,12 +33,7 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
-
-        var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-back");
-        if (llMeasurement != null && llMeasurement.tagCount>0
-                && Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0) {
-            // m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
-        }
+        
         
 
         SmartDashboard.putNumber("Left y", m_robotContainer.joystick.getLeftY());
@@ -45,12 +41,11 @@ public class Robot extends TimedRobot {
         SmartDashboard.putNumber("Left trig", m_robotContainer.joystick.getL2Axis());
         SmartDashboard.putNumber("Right trig", m_robotContainer.joystick.getR2Axis());
         SmartDashboard.putNumber("right x", m_robotContainer.joystick.getRightX());
-        SmartDashboard.putNumber("ll tag count", llMeasurement.tagCount);
-        boolean[] boolArr = { llMeasurement != null, llMeasurement.tagCount > 0,
-                Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0 };
-
-        SmartDashboard.putBooleanArray("ll mount", boolArr);
+        SmartDashboard.putNumber("sum trig", Math.abs((m_robotContainer.joystick.getL2Axis()+1)/2 - (m_robotContainer.joystick.getR2Axis()+1)/2));
         SmartDashboard.putNumber("dist from goal",(m_robotContainer.drivetrain.getStateCopy().Pose.getTranslation().getDistance(CommandSwerveDrivetrain.goalPose2d)) );
+        DogLog.log("roboPose",m_robotContainer.drivetrain.getStateCopy().Pose);
+    
+
     }
 
     @Override
@@ -74,6 +69,7 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().schedule(m_autonomousCommand);
         }
+        m_robotContainer.drivetrain.updateGoalPose();
     }
 
     @Override
@@ -89,10 +85,24 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().cancel(m_autonomousCommand);
         }
+        m_robotContainer.drivetrain.updateGoalPose();
+
     }
 
     @Override
     public void teleopPeriodic() {
+         var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-back");
+        if (llMeasurement != null && llMeasurement.tagCount>0
+                && Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0) {
+            m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
+        }
+         SmartDashboard.putNumber("ll tag count", llMeasurement.tagCount);
+        boolean[] boolArr = { llMeasurement != null, llMeasurement.tagCount > 0,
+                Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0 };
+
+        SmartDashboard.putBooleanArray("ll mount", boolArr);
+       
+       
     }
 
     @Override

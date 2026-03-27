@@ -31,6 +31,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private bangbangCommand bang;
     private double targetRPM = 0.0;
     private CommandSwerveDrivetrain drivetrain;
+    public boolean fixed = false;
 
     public ShooterSubsystem(CommandSwerveDrivetrain drivetrain) {
         leftShooter = new TalonFX(30);
@@ -40,8 +41,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
         TalonFXConfiguration shooter = new TalonFXConfiguration()
                 .withCurrentLimits(new CurrentLimitsConfigs()
-                        .withSupplyCurrentLimit(70)
-                        .withStatorCurrentLimit(70))
+                        .withSupplyCurrentLimit(50)
+                        .withStatorCurrentLimit(50))
                 .withMotorOutput(new MotorOutputConfigs()
                         .withInverted(InvertedValue.Clockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Coast));
@@ -74,9 +75,15 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("left shooter velocity", this.getShooterVelocity().in(RotationsPerSecond));
         SmartDashboard.putNumber("left shooter power", leftShooter.getDutyCycle().getValueAsDouble());
         SmartDashboard.putNumber("left shooter RPM", this.getShooterVelocity().in(RPM));
+        SmartDashboard.putBoolean("fixed", fixed);
 
-        targetRPM = Constants.getRPM(drivetrain.getDistFromGoal().in(Meter));
 
+        targetRPM =(!fixed) ? Constants.getRPM(drivetrain.getDistFromGoal().in(Meter)):2820;
+        SmartDashboard.putNumber("targetRPM", targetRPM);
+
+    }
+    public void switchFixed(){
+         fixed = !fixed;
     }
 
     

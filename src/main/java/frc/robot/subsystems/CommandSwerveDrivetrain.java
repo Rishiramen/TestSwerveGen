@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
@@ -15,6 +16,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -158,7 +160,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
 
     }
-
+    public void updateGoalPose(){
+        goalPose2d = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
+                ? redGoal
+                : blueGoal;
+    }
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      * <p>
@@ -320,7 +326,7 @@ private void configureAutoBuilder() {
     private final Translation2d blueGoal = new Translation2d(4.03 + Meter.convertFrom(47 / 2, Inch), 8.07 / 2
                 );
 
-    private final Translation2d redGoal = new Translation2d(16.513 - 4.03 - Meter.convertFrom(47 / 2, Inch), 8.07 / 2
+    private final Translation2d redGoal = new Translation2d(16.513 - 4.03 - Meter.convertFrom(47 / 2, Inch), 8.07 / 2+.6
                 );
 
     public static Translation2d goalPose2d = new Translation2d(0,0);

@@ -13,63 +13,66 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class HopperSubsystem extends SubsystemBase {
-    private TalonFX hopper;
+public class FeederSubsystem extends SubsystemBase {
+    private TalonFX feeder;
 
-    public HopperSubsystem() {
-        hopper = new TalonFX(35);
+    public FeederSubsystem() {
+        feeder = new TalonFX(32);
 
-        TalonFXConfiguration config = new TalonFXConfiguration()
+       TalonFXConfiguration tr = new TalonFXConfiguration()
                 .withCurrentLimits(new CurrentLimitsConfigs()
-                        .withSupplyCurrentLimit(30)
-                        .withStatorCurrentLimit(30))
+                        .withSupplyCurrentLimit(25)
+                        .withStatorCurrentLimit(25))
                 .withMotorOutput(new MotorOutputConfigs()
-                        .withInverted(InvertedValue.Clockwise_Positive)
-                        .withNeutralMode(NeutralModeValue.Coast));
+                        .withInverted(InvertedValue.CounterClockwise_Positive)
+                        .withNeutralMode(NeutralModeValue.Brake));
 
-        hopper.getConfigurator().apply(config);
+        feeder.getConfigurator().apply(tr);
     }
 
     @Override
     public void periodic() {
 
-        SmartDashboard.putNumber("hoppwe Current", hopper.getStatorCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("feeder Current", feeder.getStatorCurrent().getValueAsDouble());
         // SmartDashboard.putNumber("shooter Current w/ Low Pass Filter",
         // filteredCurrent);
-        SmartDashboard.putNumber("hoppwe velo", hopper.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("feeder velo", feeder.getVelocity().getValueAsDouble());
     }
 
     public Command runForward() {
-        return run(() -> runRaw(0.5));
+        return run(() -> runRaw(-0.5));
     }
 
     public Command runBackward() {
-        return run(() -> runRaw(-1.0));
+        return run(() -> runRaw(1));
     }
 
     public Command stop()
     {
         return run(() -> runRaw(0.0));
     }
+    
     public Command runForwardOnce() {
-        return run(() -> runRaw(0.5));
+        return runOnce(() -> runRaw(-0.5));
     }
 
     public Command runBackwardOnce() {
-        return run(() -> runRaw(-1.0));
+        return runOnce(() -> runRaw(1));
     }
 
     public Command stopOnce()
     {
-        return run(() -> runRaw(0.0));
+        return runOnce(() -> runRaw(0.0));
     }
+
+
 
     public Command runTake(DoubleSupplier power) {
         return runOnce(() -> runRaw(power.getAsDouble()));
     }
 
     public void runRaw(double power) {
-        hopper.set(power);
+        feeder.set(power);
     }
 
     public Command runHopperOnce(double power) {

@@ -37,7 +37,7 @@ public class ClimberSubsystem extends SubsystemBase {
                         .withStatorCurrentLimit(60))
                 .withMotorOutput(new MotorOutputConfigs()
                         .withInverted(InvertedValue.Clockwise_Positive)
-                        .withNeutralMode(NeutralModeValue.Coast));
+                        .withNeutralMode(NeutralModeValue.Brake));
 
         take.getConfigurator().apply(shooter);
 
