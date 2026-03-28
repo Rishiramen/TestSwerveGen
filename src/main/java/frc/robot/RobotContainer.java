@@ -105,12 +105,13 @@ public class RobotContainer {
                 feederSubsystem.setDefaultCommand(feederSubsystem.stop());
 
                 intakeSubsystem.setDefaultCommand(
-                                intakeSubsystem.runTake()
-                                );
+                                intakeSubsystem.runTake(() -> ((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2 ))
+                        );
                 hopperSubsystem.setDefaultCommand(
                                 hopperSubsystem.runTake(() -> ((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2 )*.0 ));
                 
                 climberSubsystem.setDefaultCommand(
+
                                 climberSubsystem.runTake(() -> joystick2.getLeftY()));
                 drivetrain.setDefaultCommand(
                                 // Drivetrain will execute this command periodically
@@ -212,7 +213,7 @@ public class RobotContainer {
                 new Trigger(() -> Math.abs((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2)>.01 )
                         .whileTrue(new InstantCommand(() -> speedMult=.3)
                                 .alongWith(feederSubsystem.runForward())
-                                .alongWith(new InstantCommand(() -> intakeSubsystem.updatePower(() -> (joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2)))
+                                // .alongWith(new InstantCommand(() -> intakeSubsystem.updatePower(() -> (joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2)))
                                 )
                         .whileFalse(new InstantCommand(() -> speedMult=1));
                 

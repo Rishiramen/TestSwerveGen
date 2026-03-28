@@ -33,8 +33,8 @@ public class ClimberSubsystem extends SubsystemBase {
 
         TalonFXConfiguration shooter = new TalonFXConfiguration()
                 .withCurrentLimits(new CurrentLimitsConfigs()
-                        .withSupplyCurrentLimit(60)
-                        .withStatorCurrentLimit(60))
+                        .withSupplyCurrentLimit(40)
+                        .withStatorCurrentLimit(40))
                 .withMotorOutput(new MotorOutputConfigs()
                         .withInverted(InvertedValue.Clockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Brake));

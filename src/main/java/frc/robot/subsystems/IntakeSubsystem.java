@@ -121,8 +121,8 @@ public class IntakeSubsystem extends SubsystemBase {
                         .withNeutralMode(NeutralModeValue.Coast));
         TalonFXConfiguration configArm = new TalonFXConfiguration()
                 .withCurrentLimits(new CurrentLimitsConfigs()
-                        .withSupplyCurrentLimit(30)
-                        .withStatorCurrentLimit(30))
+                        .withSupplyCurrentLimit(20)
+                        .withStatorCurrentLimit(20))
                 .withMotorOutput(new MotorOutputConfigs()
                         .withInverted(InvertedValue.CounterClockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Brake));
@@ -162,11 +162,11 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public Command runForward() {
-        return runOnce(() -> {updatePower(()->.5);});
+        return run(() -> runRaw(0.5));
     }
 
     public Command runBackward() {
-        return runOnce(() -> {updatePower(()->-.5);});
+        return run(() -> runRaw(-1.0));
     }
 
     public Command stop() {
@@ -177,8 +177,8 @@ public class IntakeSubsystem extends SubsystemBase {
         this.power = power.getAsDouble();
     }
 
-    public Command runTake() {
-        return run(() -> runRaw(power));
+    public Command runTake(DoubleSupplier power) {
+        return runOnce(() -> runRaw(power.getAsDouble()));
     }
 
 
