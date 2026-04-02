@@ -1,0 +1,137 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "start intake"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "deploy intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "intake right"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "shoot path right"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "start kicker"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "start hopper"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "prime hang"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stow intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.75
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop hopper"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop kicker"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "right hang"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "deploy hang"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Right auto",
+  "choreoAuto": false
+}
