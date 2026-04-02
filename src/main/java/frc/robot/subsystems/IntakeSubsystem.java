@@ -34,12 +34,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private State state = State.STOWED;
 
-    private Angle START_HORIZONTAL_OFFSET = Degree.of(85);
+    private Angle START_HORIZONTAL_OFFSET = Degree.of(95);
     public static final double WRIST_RATIO = 1.0/75.0;
 
 
     public enum State {
         DEPLOYED(15),
+        TRANSFER(60),
         STOWED(95);
 
         private final Angle angle;
@@ -121,8 +122,8 @@ public class IntakeSubsystem extends SubsystemBase {
                         .withNeutralMode(NeutralModeValue.Coast));
         TalonFXConfiguration configArm = new TalonFXConfiguration()
                 .withCurrentLimits(new CurrentLimitsConfigs()
-                        .withSupplyCurrentLimit(20)
-                        .withStatorCurrentLimit(20))
+                        .withSupplyCurrentLimit(40)
+                        .withStatorCurrentLimit(40))
                 .withMotorOutput(new MotorOutputConfigs()
                         .withInverted(InvertedValue.CounterClockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Brake));
@@ -162,25 +163,21 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public Command runForward() {
-        return run(() -> runRaw(0.5));
+        return run(() -> runRaw(1));
     }
 
     public Command runBackward() {
         return run(() -> runRaw(-1.0));
     }
 
-    public Command stop() {
-        return runOnce(() -> {updatePower(()->-.5);});
+    public Command stop()
+    {
+        return run(() -> runRaw(0.0));
     }
-
-    public void updatePower(DoubleSupplier power){
-        this.power = power.getAsDouble();
-    }
-
+    
     public Command runTake(DoubleSupplier power) {
         return runOnce(() -> runRaw(power.getAsDouble()));
     }
-
 
     public void runRaw(double power) {
         take.set(power);

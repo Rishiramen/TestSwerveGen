@@ -21,8 +21,8 @@ public class HopperSubsystem extends SubsystemBase {
 
         TalonFXConfiguration config = new TalonFXConfiguration()
                 .withCurrentLimits(new CurrentLimitsConfigs()
-                        .withSupplyCurrentLimit(30)
-                        .withStatorCurrentLimit(30))
+                        .withSupplyCurrentLimit(50)
+                        .withStatorCurrentLimit(50))
                 .withMotorOutput(new MotorOutputConfigs()
                         .withInverted(InvertedValue.Clockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Coast));
@@ -40,7 +40,7 @@ public class HopperSubsystem extends SubsystemBase {
     }
 
     public Command runForward() {
-        return run(() -> runRaw(0.5));
+        return run(() -> runRaw(1));
     }
 
     public Command runBackward() {

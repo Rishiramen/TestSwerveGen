@@ -8,6 +8,9 @@ import com.ctre.phoenix6.HootAutoReplay;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,11 +31,18 @@ public class Robot extends TimedRobot {
     public Robot() {
         m_robotContainer = new RobotContainer();
     }
+    @Override
+    public void robotInit(){
+        // CameraServer.startAutomaticCapture();
+        DataLogManager.start();
+        // DriverStation.startDataLog(DataLogManager.getLog());
+    }
 
     @Override
     public void robotPeriodic() {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
+        SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
         
         
 

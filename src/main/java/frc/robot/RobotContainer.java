@@ -9,6 +9,8 @@ import static edu.wpi.first.units.Units.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+import org.ironmaple.simulation.IntakeSimulation.IntakeSide;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -88,6 +90,7 @@ public class RobotContainer {
         private final FeederSubsystem feederSubsystem;
         private final HopperSubsystem hopperSubsystem;
         private final CommandPS5Controller joystick2 = new CommandPS5Controller(1);
+        private final CommandPS5Controller joystickTester = new CommandPS5Controller(2);
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
         private final SendableChooser<Command> autoChooser;
@@ -143,26 +146,30 @@ public class RobotContainer {
 
 
                 boolean useShooter = true;
-                boolean useIntake = false;
+                boolean useIntake = true;
                 boolean useHopper = true;
                 boolean useHang = true;
 
 
                 NamedCommands.registerCommand("prime hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(1)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
 
-                NamedCommands.registerCommand("start hopper", useHopper&&useShooter ? hopperSubsystem.runBackward().raceWith(new WaitCommand(4)) : new InstantCommand());
+                NamedCommands.registerCommand("start hopper", useHopper&&useShooter ? hopperSubsystem.runBackward().raceWith(new WaitCommand(.1)) : new InstantCommand());
                 
                 NamedCommands.registerCommand("stop hopper", useHopper&&useShooter ? hopperSubsystem.stop().raceWith(new WaitCommand(.1)) : new InstantCommand());
                 
-                NamedCommands.registerCommand("start kicker", useHopper&&useShooter ? feederSubsystem.runBackward().raceWith(new WaitCommand(4)) : new InstantCommand());
+                NamedCommands.registerCommand("start intake", useIntake ? intakeSubsystem.runBackward().raceWith(new WaitCommand(.1)) : new InstantCommand());
+
+                NamedCommands.registerCommand("stop intake", useIntake ? intakeSubsystem.stop().raceWith(new WaitCommand(.1)) : new InstantCommand());
+                
+                NamedCommands.registerCommand("start kicker", useHopper&&useShooter ? feederSubsystem.runBackward().raceWith(new WaitCommand(.1)) : new InstantCommand());
 
                 NamedCommands.registerCommand("stop kicker", useHopper&&useShooter ? feederSubsystem.stop().raceWith(new WaitCommand(.1)) : new InstantCommand());
 
-                
                 NamedCommands.registerCommand("deploy hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(2)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
 
-                NamedCommands.registerCommand("stow intake", useIntake ? intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED) : new InstantCommand());
-                NamedCommands.registerCommand("deploy intake", useIntake ? intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED) : new InstantCommand());
+                NamedCommands.registerCommand("stow intake", useIntake ? intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED).raceWith(new WaitCommand(1)) : new InstantCommand());
+                NamedCommands.registerCommand("deploy intake", useIntake ? intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED).raceWith(new WaitCommand(.5)) : new InstantCommand());
+
                 
                 configureBindings();
 
@@ -225,7 +232,7 @@ public class RobotContainer {
                 joystick2.circle().onTrue(intakeSubsystem.rezero(true));
                 joystick.povUp().or(joystick2.povUp()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED));
                 joystick.povDown().or(joystick2.povDown()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED));
-
+                joystick2.povLeft().or(joystick2.povRight()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.TRANSFER));
                 joystick2.square().onTrue(new InstantCommand(shooterSubsystem::switchFixed));
                 
                 
@@ -262,12 +269,12 @@ public class RobotContainer {
                 // Run SysId routines when holding back/start and X/Y.
                 // Note that each routine should be run exactly once in a single log.
                 
-                joystick.create().and(joystick.triangle()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-                joystick.create().and(joystick.square()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-                joystick.options().and(joystick.triangle()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-                joystick.options().and(joystick.square()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+                // joystickTester.create().and(joystickTester.triangle()).whileTrue(shooterSubsystem.sysIdDynamic(Direction.kForward));
+                // joystickTester.create().and(joystickTester.square()).whileTrue(shooterSubsystem.sysIdDynamic(Direction.kReverse));
+                // joystickTester.options().and(joystickTester.triangle()).whileTrue(shooterSubsystem.sysIdQuasistatic(Direction.kForward));
+                // joystickTester.options().and(joystickTester.square()).whileTrue(shooterSubsystem.sysIdQuasistatic(Direction.kReverse));
 
-                // Reset the field-centric heading on left bumper press.
+                      // Reset the field-centric heading on left bumper press.
                 joystick.L1().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
         }
 
