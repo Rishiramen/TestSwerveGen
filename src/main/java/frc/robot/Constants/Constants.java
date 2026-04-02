@@ -9,7 +9,7 @@ public class Constants {
         metersToRPM.put(0.05, 2000.0);
         metersToRPM.put(2.65, 2700.0);
         metersToRPM.put(1.87, 2270.0);
-        metersToRPM.put(2.35, 2350.0);
+        metersToRPM.put(2.35, 2550.0);
         metersToRPM.put(3.4, 2750.0);
         metersToRPM.put(3.6, 2850.0);
         metersToRPM.put(5.1, 4400.0);
