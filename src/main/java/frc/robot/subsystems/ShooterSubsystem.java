@@ -38,8 +38,12 @@ public class ShooterSubsystem extends SubsystemBase {
     private TalonFX leftShooter, rightShooter;
     // private bangbangCommand bang;
     private double targetRPM = 0.0;
+    private final double stationaryRPM = 2800;
+    private double rpmInc = 200/50; // 50 hz looptimes, 200rpm/s
+    private double rpmOffset = 0.0;
     private CommandSwerveDrivetrain drivetrain;
     public boolean fixed = false;
+    public boolean on = false;
     private final SysIdRoutine sysIdRoutine;
     private final VelocityVoltage flywheelVelocity = new VelocityVoltage(0);
 
@@ -101,18 +105,28 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("left shooter rps", leftShooter.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("left shooter velocity", this.getShooterVelocity().in(RotationsPerSecond));
         SmartDashboard.putNumber("left shooter power", leftShooter.get());
+
         SmartDashboard.putNumber("left shooter RPM", this.getShooterVelocity().in(RPM));
         SmartDashboard.putBoolean("fixed", fixed);
+        SmartDashboard.putBoolean("on", on);
 
-        targetRPM = (!fixed) ? Constants.getRPM(drivetrain.getDistFromGoal().in(Meter)) : 3200;
-        // targetRPM = SmartDashboard.getNumber("targetRPM",(!fixed) ? Constants.getRPM(drivetrain.getDistFromGoal().in(Meter)) : 3200);
+        targetRPM = ((!fixed) ? Constants.getRPM(drivetrain.getDistFromGoal().in(Meter)) : stationaryRPM) + rpmOffset;
+        // targetRPM = SmartDashboard.getNumber("targetRPM",(!fixed) ? Constants.getRPM(drivetrain.getDistFromGoal().in(Meter)) : stationaryRPM) + rpmOffset;
         SmartDashboard.putNumber("targetRPM", targetRPM);
         SmartDashboard.putString("shooter Command", getCurrentCommand() == null ? "null" : getCurrentCommand().getName());
 
     }
 
+    // inc = -1 to 1
+    public void incrementOffset(double inc) {
+        rpmOffset += rpmInc * inc;
+    }
+
     public void switchFixed() {
         fixed = !fixed;
+    }
+    public void toggleOn() {
+        on = !on;
     }
     
 
@@ -122,7 +136,12 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void setVelocity(double rpm){
-        leftShooter.setControl(flywheelVelocity.withVelocity(rpm / 60.0).withSlot(0));
+        if (on) {
+            leftShooter.setControl(flywheelVelocity.withVelocity(rpm / 60.0).withSlot(0));
+        }
+        else{
+            leftShooter.set(0);
+        }
     }
 
     public Command setTargetRPM(double RPM) {

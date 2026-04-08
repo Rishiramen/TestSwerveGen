@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.08646866719924,
-        "y": 4.009984239555075
+        "x": 3.57418439716312,
+        "y": 7.548
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.609889897745228,
-        "y": 4.129832103545079
+        "x": 6.147232736537475,
+        "y": 7.32641666998018
       },
       "isLocked": false,
-      "linkedName": "shoot"
+      "linkedName": "left start pose"
     },
     {
       "anchor": {
-        "x": 1.5,
-        "y": 4.113790576054148
+        "x": 7.783979511426319,
+        "y": 5.204000000000001
       },
       "prevControl": {
-        "x": 1.9630407354491342,
-        "y": 3.9981100604264515
+        "x": 8.51300580891788,
+        "y": 7.591219636621268
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "hang-left1"
+      "linkedName": "left intake pose"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.24987225344915678,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -41,11 +46,11 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 0.0
+    "velocity": 0.0,
+    "rotation": -110.0
   },
   "reversed": false,
-  "folder": "mid paths",
+  "folder": "left paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

@@ -84,12 +84,12 @@ public class RobotContainer {
         private Translation3d goalPose3d = new Translation3d(0, 0, 0);
 
         public final CommandPS5Controller joystick = new CommandPS5Controller(0);
-        private final ShooterSubsystem shooterSubsystem;
-        private final IntakeSubsystem intakeSubsystem;
+        public final ShooterSubsystem shooterSubsystem;
+        public final IntakeSubsystem intakeSubsystem;
         private final ClimberSubsystem climberSubsystem;
         private final FeederSubsystem feederSubsystem;
         private final HopperSubsystem hopperSubsystem;
-        private final CommandPS5Controller joystick2 = new CommandPS5Controller(1);
+        public final CommandPS5Controller joystick2 = new CommandPS5Controller(1);
         private final CommandPS5Controller joystickTester = new CommandPS5Controller(2);
 
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -108,7 +108,7 @@ public class RobotContainer {
                 feederSubsystem.setDefaultCommand(feederSubsystem.stop());
 
                 intakeSubsystem.setDefaultCommand(
-                                intakeSubsystem.runTake(() -> ((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2 ))
+                                intakeSubsystem.runTake(() -> ((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 ))
                         );
                 hopperSubsystem.setDefaultCommand(
                                 hopperSubsystem.runTake(() -> ((joystick.getL2Axis()+1)/2 - (joystick.getR2Axis()+1)/2 + (joystick2.getL2Axis()+1)/2-(joystick2.getR2Axis()+1)/2 )*.0 ));
@@ -145,10 +145,10 @@ public class RobotContainer {
                 
 
 
-                boolean useShooter = true;
-                boolean useIntake = true;
-                boolean useHopper = true;
-                boolean useHang = true;
+                boolean useShooter = false;
+                boolean useIntake = false;
+                boolean useHopper = false;
+                boolean useHang = false;
 
 
                 NamedCommands.registerCommand("prime hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(1)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
@@ -165,12 +165,11 @@ public class RobotContainer {
 
                 NamedCommands.registerCommand("stop kicker", useHopper&&useShooter ? feederSubsystem.stop().raceWith(new WaitCommand(.1)) : new InstantCommand());
 
-                NamedCommands.registerCommand("deploy hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(2)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
+                NamedCommands.registerCommand("deploy hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(2.5)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
 
                 NamedCommands.registerCommand("stow intake", useIntake ? intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED).raceWith(new WaitCommand(1)) : new InstantCommand());
                 NamedCommands.registerCommand("deploy intake", useIntake ? intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED).raceWith(new WaitCommand(.5)) : new InstantCommand());
 
-                
                 configureBindings();
 
                 
@@ -234,6 +233,13 @@ public class RobotContainer {
                 joystick.povDown().or(joystick2.povDown()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED));
                 joystick2.povLeft().or(joystick2.povRight()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.TRANSFER));
                 joystick2.square().onTrue(new InstantCommand(shooterSubsystem::switchFixed));
+                joystick2.R1().onTrue(new InstantCommand(shooterSubsystem::toggleOn));
+                // joystick2.axisMagnitudeGreaterThan(PS5Controller.Axis.kL2.value, .01).or(
+                //         joystick2.axisMagnitudeGreaterThan(PS5Controller.Axis.kR2.value, .01)
+                // ).whileTrue(new InstantCommand(() -> shooterSubsystem.incrementOffset(
+                //         (joystick2.getR2Axis()+1)/2
+                //         // -(joystick2.getL2Axis()+1)/2
+                // )));
                 
                 
                 

@@ -34,7 +34,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private State state = State.STOWED;
 
-    private Angle START_HORIZONTAL_OFFSET = Degree.of(95);
+    private Angle START_HORIZONTAL_OFFSET = Degree.of(85);
     public static final double WRIST_RATIO = 1.0/75.0;
 
 
@@ -128,7 +128,7 @@ public class IntakeSubsystem extends SubsystemBase {
                         .withInverted(InvertedValue.CounterClockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Brake));
 
-        configArm.Slot0.kP = 0.3; // start small, tune up
+        configArm.Slot0.kP = 0.4; // start small, tune up
         configArm.Slot0.kI = 0.0;
         configArm.Slot0.kD = 0.0;
 
