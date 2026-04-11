@@ -101,15 +101,8 @@ public class ProjectileCalculations {
     }
 
     public double calcAirTime(double initVel){
-        double startVel = calcInitVertVel(initVel, pitch);
-        if (startVel > 0) {
-            double val1 = (calcVelTer()/gravAccel);
-            double val2 = Math.atan(startVel/calcVelTer());
-            return val1 * val2;
-        }
-        else{
-            return 0.0;
-        }
+        double[] state = stateAtYTarget(initVel);
+        return state != null ? state[1] : 0.0;
     }
 
     public double calcVertVelocity(double initVel){
@@ -243,7 +236,7 @@ public class ProjectileCalculations {
 
     // Predict horizontal x at the instant the projectile crosses yTarget (descending).
 // Returns NaN if it never reaches yTarget (e.g., too low speed/angle).
-    private double xAtYTargetQuadratic(double u0) {
+    private double[] stateAtYTarget(double u0) {
         final double k = 0.5 * airDens * dragCoeff * area; // quadratic drag coefficient
         final double g = gravAccel;
 
@@ -252,33 +245,31 @@ public class ProjectileCalculations {
         double vx = u0 * Math.cos(pitch);
         double vy = u0 * Math.sin(pitch);
 
+        java.util.function.BiConsumer<double[], double[]> deriv = (s, ds) -> {
+            double sx = s[0], sy = s[1], svx = s[2], svy = s[3];
+            double v = Math.hypot(svx, svy);
+            double ax_drag = -(k / mass) * v * svx;
+            double ay_drag = -(k / mass) * v * svy - g;
+            double ax_magnus = magnusK * svy;
+            double ay_magnus = -magnusK * svx;
+
+            double ax = ax_drag + ax_magnus;
+            double ay = ay_drag + ay_magnus;
+
+            ds[0] = svx;
+            ds[1] = svy;
+            ds[2] = ax;
+            ds[3] = ay;
+        };
+
         // Integrate with RK4
         final double dt = 0.002;        // 2 ms step; adjust if needed
         final double tMax = 5.0;        // safety cap (s)
-        double prevX = x, prevY = y;
+        double prevX = x, prevY = y, prevT = 0.0;
 
         for (double t = 0.0; t < tMax; t += dt) {
             // Save previous point for crossing interpolation
-            prevX = x; prevY = y;
-
-            // RK4 step
-            // a(v) = -(k/m) * |v| * v - (0, g)
-            java.util.function.BiConsumer<double[], double[]> deriv = (s, ds) -> {
-                double sx = s[0], sy = s[1], svx = s[2], svy = s[3];
-                double v = Math.hypot(svx, svy);
-                double ax_drag = -(k / mass) * v * svx;
-                double ay_drag = -(k / mass) * v * svy - g;
-                double ax_magnus = magnusK * svy;
-                double ay_magnus = -magnusK * svx;
-
-                double ax = ax_drag + ax_magnus;
-                double ay = ay_drag + ay_magnus;
-
-                ds[0] = svx;
-                ds[1] = svy;
-                ds[2] = ax;
-                ds[3] = ay;
-            };
+            prevX = x; prevY = y; prevT = t;
 
             double[] s = { x, y, vx, vy };
             double[] k1 = new double[4], k2 = new double[4], k3 = new double[4], k4 = new double[4], tmp = new double[4];
@@ -304,14 +295,20 @@ public class ProjectileCalculations {
             if (prevY > yTarget && y <= yTarget) {
                 double alpha = (prevY - yTarget) / (prevY - y); // linear in y over the small dt
                 double xCross = prevX + alpha * (x - prevX);
-                return xCross;
+                double tCross = prevT + alpha * dt;
+                return new double[]{xCross, tCross};
             }
 
             // Early exit if projectile fell well below target height
             if (y < (yTarget - 2.0)) break;
         }
 
-        return Double.NaN;
+        return null;
+    }
+    
+    private double xAtYTargetQuadratic(double u0) {
+        double[] state = stateAtYTarget(u0);
+        return state != null ? state[0] : Double.NaN;
     }
 
     // Find initial speed u0 so that xAtYTargetQuadratic(u0, theta) ≈ xDist.
@@ -326,7 +323,7 @@ public class ProjectileCalculations {
         double nodrag = Double.NaN;
         if (Math.abs(c) > 1e-9 && xDist * s - yTarget * c > 0) {
             // No-drag: u0^2 = g x^2 / (2 c^2 (x tanθ - y))
-            nodrag = Math.pow((gravAccel * xDist * xDist) / (2.0 * c * c * (xDist * Math.tan(pitch) - yTarget)), 2);
+            nodrag = Math.sqrt((gravAccel * xDist * xDist) / (2.0 * c * c * (xDist * Math.tan(pitch) - yTarget)));
         }
         double hi = Double.isNaN(nodrag) ? 8.0 : Math.max(8.0, nodrag);
 
