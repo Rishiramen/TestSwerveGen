@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.Constants;
+import frc.robot.Constants.ProjectileCalculations;
 
 public class ShooterSubsystem extends SubsystemBase {
     private TalonFX leftShooter, rightShooter;
@@ -46,6 +47,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public boolean on = false;
     private final SysIdRoutine sysIdRoutine;
     private final VelocityVoltage flywheelVelocity = new VelocityVoltage(0);
+    private final ProjectileCalculations calc = new ProjectileCalculations(Math.toRadians(20));
 
     public ShooterSubsystem(CommandSwerveDrivetrain drivetrain) {
         leftShooter = new TalonFX(30);
@@ -109,6 +111,10 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("left shooter RPM", this.getShooterVelocity().in(RPM));
         SmartDashboard.putBoolean("fixed", fixed);
         SmartDashboard.putBoolean("on", on);
+
+        //double distance = drivetrain.getDistFromGoal().in(Meter);
+        //targetRPM = (!fixed) ? calc.distanceToRPM(distance) : stationaryRPM; targetRPM += rpmOffset;
+    
 
         targetRPM = ((!fixed) ? Constants.getRPM(drivetrain.getDistFromGoal().in(Meter)) : stationaryRPM) + rpmOffset;
         // targetRPM = SmartDashboard.getNumber("targetRPM",(!fixed) ? Constants.getRPM(drivetrain.getDistFromGoal().in(Meter)) : stationaryRPM) + rpmOffset;

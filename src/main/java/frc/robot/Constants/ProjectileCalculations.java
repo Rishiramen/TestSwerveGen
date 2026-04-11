@@ -1,6 +1,8 @@
 package frc.robot.Constants;
 
 public class ProjectileCalculations {
+    private final double magnusK = 0.00025;
+
     private final double dragCoeff = 0.47;
 
     private final double airDens = 1.21;
@@ -14,6 +16,10 @@ public class ProjectileCalculations {
     private final double mass = 0.219; // in kg
 
     private final double yTarget = 1.44145; // in m
+
+    private final static double flywheelRadius = 5; //idk yet
+    private final double shootEffec = 1.0; //js in case
+
 
 
     public ProjectileCalculations(double pitch) {
@@ -91,7 +97,7 @@ public class ProjectileCalculations {
     public double calcVelTer(){
         double val1 = 2 * mass * gravAccel;
         double val2 = dragCoeff * area * airDens;
-        return (Math.pow(Math.abs(val1/val2), 2));
+        return (Math.sqrt(Math.abs(val1/val2)));
     }
 
     public double calcAirTime(double initVel){
@@ -260,8 +266,14 @@ public class ProjectileCalculations {
             java.util.function.BiConsumer<double[], double[]> deriv = (s, ds) -> {
                 double sx = s[0], sy = s[1], svx = s[2], svy = s[3];
                 double v = Math.hypot(svx, svy);
-                double ax = -(k / mass) * v * svx;
-                double ay = -(k / mass) * v * svy - g;
+                double ax_drag = -(k / mass) * v * svx;
+                double ay_drag = -(k / mass) * v * svy - g;
+                double ax_magnus = magnusK * svy;
+                double ay_magnus = -magnusK * svx;
+
+                double ax = ax_drag + ax_magnus;
+                double ay = ay_drag + ay_magnus;
+
                 ds[0] = svx;
                 ds[1] = svy;
                 ds[2] = ax;
@@ -340,59 +352,17 @@ public class ProjectileCalculations {
         return 0.5 * (lo + hi);
     }
 
-//    public double xToInitVel(double xDist) {
-//        double vt = calcVelTer();
-//        double u0 = 5.0;
-//        double tol = 1e-6;
-//        int maxIter = 100;
-//
-//        for (int i = 0; i < maxIter; i++) {
-//            double v0y = u0 * Math.tan(pitch);
-//            double denom = 2.0 * Math.atan(v0y / vt);
-//
-//
-//            if (Math.abs(denom) < 1e-9) return 0.0;
-//
-//
-//            double newU0 = (vt / denom) * (Math.exp((gravAccel * xDist) / (vt * vt)) - 1.0);
-//
-//            if (Math.abs(newU0 - u0) < tol) {
-//                u0 = newU0;
-//                break;
-//            }
-//
-//            u0 = 0.5 * (u0 + newU0);
-//        }
-//
-//        return u0;
-//    }
-//    public double xToInitVel(double xDist, double pitchAvg) {
-//
-//        double vt = calcVelTer();
-//
-//
-//        double u0 = 5.0;
-//        double tol = 1e-6;
-//        int maxIter = 100;
-//
-//        for (int i = 0; i < maxIter; i++) {
-//            double v0y = u0 * Math.tan(pitchAvg);
-//            double denom = 2.0 * Math.atan(v0y / vt);
-//
-//
-//            if (Math.abs(denom) < 1e-9) return 0.0;
-//
-//
-//            double newU0 = (vt / denom) * (Math.exp((gravAccel * xDist) / (vt * vt)) - 1.0);
-//
-//            if (Math.abs(newU0 - u0) < tol) {
-//                u0 = newU0;
-//                break;
-//            }
-//
-//            u0 = 0.5 * (u0 + newU0);
-//        }
-//
-//        return u0;
-//    }
+    public static double velocityToRPM(double velocity) {
+        double omega = velocity / flywheelRadius; // rad/s
+        return (omega / (2 * Math.PI)) * 60.0; // RPM
+    }
+
+    public double distanceToRPM(double xDist) {
+        double velocity = initialSpeedForShotQuadratic(xDist);
+
+        if (Double.isNaN(velocity) || velocity <= 0) {
+            return 0.0;
+        }
+        return velocityToRPM(velocity) * shootEffec;
+    }
 }
