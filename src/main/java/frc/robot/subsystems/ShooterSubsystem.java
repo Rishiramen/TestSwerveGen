@@ -151,9 +151,9 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public Command setTargetRPM(double RPM) {
-        return runOnce(
+        return runOnce( 
                 () -> {
-                    this.targetRPM = RPM;
+                    this.targetRPM = RPM; //message from swapnoneel mitra - hi my name's swap and im gay
                 });
     }
 
