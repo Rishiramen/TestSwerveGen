@@ -102,13 +102,26 @@ public class Robot extends TimedRobot {
         }
     }
 
+    public static double getTimeToNextHubChange(double matchTime) {
+        double[] points = {130, 105, 80, 55, 30};
+
+        for (int i = 0; i < points.length; i++) {
+            if (matchTime > points[i]) {
+                return matchTime - points[i];
+            }
+        }
+
+        return 0; 
+
+    }
+
     @Override
     public void robotPeriodic() {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
         SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
         SmartDashboard.putBoolean("Is Active", isHubActive());
-
+        SmartDashboard.putNumber("Countdown to Hub Change", getTimeToNextHubChange(DriverStation.getMatchTime()));
         SmartDashboard.putNumber("Left y", m_robotContainer.joystick.getLeftY());
         SmartDashboard.putNumber("Left x", m_robotContainer.joystick.getLeftX());
         SmartDashboard.putNumber("Left trig", m_robotContainer.joystick.getL2Axis());

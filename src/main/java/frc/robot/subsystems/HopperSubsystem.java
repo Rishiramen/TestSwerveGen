@@ -24,7 +24,7 @@ public class HopperSubsystem extends SubsystemBase {
                         .withSupplyCurrentLimit(50)
                         .withStatorCurrentLimit(50))
                 .withMotorOutput(new MotorOutputConfigs()
-                        .withInverted(InvertedValue.Clockwise_Positive)
+                        .withInverted(InvertedValue.CounterClockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Coast));
 
         hopper.getConfigurator().apply(config);

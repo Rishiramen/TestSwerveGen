@@ -223,7 +223,13 @@ public class RobotContainer {
                                 )
                         .whileFalse(new InstantCommand(() -> speedMult=1));
                 
-                
+                new Trigger(() -> Math.abs(joystick.getLeftX())< .1 && Math.abs(joystick.getLeftY())< .1 &&  Math.abs(joystick.getRightX())< .1 && !joystick.R1().getAsBoolean() )
+                        .onTrue(
+                                new SequentialCommandGroup(
+                                      new WaitCommand(1),
+                                      drivetrain.applyRequest(() -> brake)  
+                                ).onlyWhile(() -> Math.abs(joystick.getLeftX())< .01 && Math.abs(joystick.getLeftY())< .01 &&  Math.abs(joystick.getRightX())< .01 && !joystick.R1().getAsBoolean())
+                );
                 
                 // joystick.cross().whileTrue(feederSubsystem.runBackward());
                 
@@ -240,6 +246,8 @@ public class RobotContainer {
                 //         (joystick2.getR2Axis()+1)/2
                 //         // -(joystick2.getL2Axis()+1)/2
                 // )));
+
+
                 
                 
                 

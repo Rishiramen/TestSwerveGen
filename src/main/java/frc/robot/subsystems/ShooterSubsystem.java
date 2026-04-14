@@ -46,7 +46,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public boolean fixed = false;
     public boolean on = false;
     private final SysIdRoutine sysIdRoutine;
-    private final VelocityVoltage flywheelVelocity = new VelocityVoltage(0);
+    private final VelocityVoltage flywheelVelocity = new VelocityVoltage(0).withEnableFOC(true);
     private final ProjectileCalculations calc = new ProjectileCalculations(Math.toRadians(20));
 
     public ShooterSubsystem(CommandSwerveDrivetrain drivetrain) {
@@ -60,7 +60,7 @@ public class ShooterSubsystem extends SubsystemBase {
                         .withSupplyCurrentLimit(50)
                         .withStatorCurrentLimit(50))
                 .withMotorOutput(new MotorOutputConfigs()
-                        .withInverted(InvertedValue.Clockwise_Positive)
+                        .withInverted(InvertedValue.CounterClockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Coast));
         shooter.Slot0.kP = 0.50; 
         shooter.Slot0.kI = 0.0;

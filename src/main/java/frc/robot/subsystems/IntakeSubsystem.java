@@ -35,13 +35,13 @@ public class IntakeSubsystem extends SubsystemBase {
     private State state = State.STOWED;
 
     private Angle START_HORIZONTAL_OFFSET = Degree.of(85);
-    public static final double WRIST_RATIO = 1.0/75.0;
+    public static final double WRIST_RATIO = 1.0/25.0*(12/32.0);
 
 
     public enum State {
         DEPLOYED(15),
         TRANSFER(60),
-        STOWED(95);
+        STOWED(135);
 
         private final Angle angle;
 
@@ -97,7 +97,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
 
     public Command runTo(){
-        PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
+        PositionVoltage m_request = new PositionVoltage(0).withSlot(0).withEnableFOC(true);
         return run(() -> pivot.setControl(m_request.withPosition(getTarget().div(WRIST_RATIO))));
     }
 
@@ -118,14 +118,14 @@ public class IntakeSubsystem extends SubsystemBase {
                         .withSupplyCurrentLimit(30)
                         .withStatorCurrentLimit(30))
                 .withMotorOutput(new MotorOutputConfigs()
-                        .withInverted(InvertedValue.Clockwise_Positive)
+                        .withInverted(InvertedValue.CounterClockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Coast));
         TalonFXConfiguration configArm = new TalonFXConfiguration()
                 .withCurrentLimits(new CurrentLimitsConfigs()
                         .withSupplyCurrentLimit(40)
                         .withStatorCurrentLimit(40))
                 .withMotorOutput(new MotorOutputConfigs()
-                        .withInverted(InvertedValue.CounterClockwise_Positive)
+                        .withInverted(InvertedValue.Clockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Brake));
 
         configArm.Slot0.kP = 0.4; // start small, tune up

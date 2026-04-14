@@ -17,7 +17,7 @@ public class ProjectileCalculations {
 
     private final double yTarget = 1.44145; // in m
 
-    private final static double flywheelRadius = 5; //idk yet
+    private final static double flywheelRadius = 0.0508; //assuming 2 in
     private final double shootEffec = 1.0; //js in case
 
 
