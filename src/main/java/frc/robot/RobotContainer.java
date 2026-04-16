@@ -151,7 +151,6 @@ public class RobotContainer {
                 boolean useHang = false;
 
 
-                NamedCommands.registerCommand("prime hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(1)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
 
                 NamedCommands.registerCommand("start hopper", useHopper&&useShooter ? hopperSubsystem.runBackward().raceWith(new WaitCommand(.1)) : new InstantCommand());
                 
@@ -165,10 +164,13 @@ public class RobotContainer {
 
                 NamedCommands.registerCommand("stop kicker", useHopper&&useShooter ? feederSubsystem.stop().raceWith(new WaitCommand(.1)) : new InstantCommand());
 
-                NamedCommands.registerCommand("deploy hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(2.5)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
+                // NamedCommands.registerCommand("deploy hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(2.5)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
 
                 NamedCommands.registerCommand("stow intake", useIntake ? intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED).raceWith(new WaitCommand(1)) : new InstantCommand());
                 NamedCommands.registerCommand("deploy intake", useIntake ? intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED).raceWith(new WaitCommand(.5)) : new InstantCommand());
+                
+                NamedCommands.registerCommand("prime hang", useIntake ? climberSubsystem.setTargetOnly(ClimberSubsystem.State.DEPLOYED).raceWith(new WaitCommand(.5)) : new InstantCommand());
+                NamedCommands.registerCommand("deploy hang", useHang ? climberSubsystem.runTake(() -> -1).alongWith(new WaitCommand(2.5)).andThen(climberSubsystem.runTake(()->0)) : new InstantCommand());
 
                 configureBindings();
 
@@ -223,13 +225,13 @@ public class RobotContainer {
                                 )
                         .whileFalse(new InstantCommand(() -> speedMult=1));
                 
-                new Trigger(() -> Math.abs(joystick.getLeftX())< .1 && Math.abs(joystick.getLeftY())< .1 &&  Math.abs(joystick.getRightX())< .1 && !joystick.R1().getAsBoolean() )
-                        .onTrue(
-                                new SequentialCommandGroup(
-                                      new WaitCommand(1),
-                                      drivetrain.applyRequest(() -> brake)  
-                                ).onlyWhile(() -> Math.abs(joystick.getLeftX())< .01 && Math.abs(joystick.getLeftY())< .01 &&  Math.abs(joystick.getRightX())< .01 && !joystick.R1().getAsBoolean())
-                );
+                // new Trigger(() -> Math.abs(joystick.getLeftX())< .1 && Math.abs(joystick.getLeftY())< .1 &&  Math.abs(joystick.getRightX())< .1 && !joystick.R1().getAsBoolean() )
+                //         .onTrue(
+                //                 new SequentialCommandGroup(
+                //                       new WaitCommand(1),
+                //                       drivetrain.applyRequest(() -> brake)  
+                //                 ).onlyWhile(() -> Math.abs(joystick.getLeftX())< .01 && Math.abs(joystick.getLeftY())< .01 &&  Math.abs(joystick.getRightX())< .01 && !joystick.R1().getAsBoolean())
+                // );
                 
                 // joystick.cross().whileTrue(feederSubsystem.runBackward());
                 
@@ -237,9 +239,21 @@ public class RobotContainer {
                 joystick2.circle().onTrue(intakeSubsystem.rezero(true));
                 joystick.povUp().or(joystick2.povUp()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.STOWED));
                 joystick.povDown().or(joystick2.povDown()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.DEPLOYED));
-                joystick2.povLeft().or(joystick2.povRight()).onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.TRANSFER));
+                joystick2.povLeft().onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.TRANSFER));
+                joystick2.povRight().onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.TEST));
+                
+                joystick2.povLeft().onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.TRANSFER));
+                joystick2.povRight().onTrue(intakeSubsystem.setTargetOnly(IntakeSubsystem.State.TEST));
+                
+                joystick2.L1().onTrue(climberSubsystem.setTargetOnly(ClimberSubsystem.State.DEPLOYED));
+                joystick2.cross().onTrue(climberSubsystem.setTargetOnly(ClimberSubsystem.State.TRANSFER));
+                
+                
+                
                 joystick2.square().onTrue(new InstantCommand(shooterSubsystem::switchFixed));
                 joystick2.R1().onTrue(new InstantCommand(shooterSubsystem::toggleOn));
+                
+                
                 // joystick2.axisMagnitudeGreaterThan(PS5Controller.Axis.kL2.value, .01).or(
                 //         joystick2.axisMagnitudeGreaterThan(PS5Controller.Axis.kR2.value, .01)
                 // ).whileTrue(new InstantCommand(() -> shooterSubsystem.incrementOffset(

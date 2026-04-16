@@ -36,9 +36,11 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private Angle START_HORIZONTAL_OFFSET = Degree.of(85);
     public static final double WRIST_RATIO = 1.0/25.0*(12/32.0);
+    public static double testPos= 15;
 
 
     public enum State {
+        TEST(-1),
         DEPLOYED(15),
         TRANSFER(60),
         STOWED(135);
@@ -53,6 +55,7 @@ public class IntakeSubsystem extends SubsystemBase {
         }
 
         public Angle angle() {
+            if(angle.in(Degree) == -1) return Units.Degrees.of(testPos);
             return angle;
         }
     }
@@ -61,7 +64,7 @@ public class IntakeSubsystem extends SubsystemBase {
         return state;
     }
     public Angle getTarget() {
-        return state.angle;
+        return state.angle();
     }
 
     public Angle getPosition() {
@@ -86,13 +89,13 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public Angle getError() {
-        return getState().angle.minus(getPosition());
+        return getState().angle().minus(getPosition());
     }
     public Command rezero(){
         return runOnce(() -> pivot.setPosition(START_HORIZONTAL_OFFSET.div(WRIST_RATIO)));
     }
     public Command rezero(boolean down){
-        return runOnce(() -> pivot.setPosition(State.DEPLOYED.angle.div(WRIST_RATIO)));
+        return runOnce(() -> pivot.setPosition(State.DEPLOYED.angle().div(WRIST_RATIO)));
     }
 
 
@@ -128,7 +131,7 @@ public class IntakeSubsystem extends SubsystemBase {
                         .withInverted(InvertedValue.Clockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Brake));
 
-        configArm.Slot0.kP = 0.4; // start small, tune up
+        configArm.Slot0.kP = 0.8; // start small, tune up
         configArm.Slot0.kI = 0.0;
         configArm.Slot0.kD = 0.0;
 
@@ -138,6 +141,8 @@ public class IntakeSubsystem extends SubsystemBase {
         pivot.getConfigurator().apply(configArm);
 
         pivot.setPosition(START_HORIZONTAL_OFFSET.div(WRIST_RATIO));
+        SmartDashboard.putNumber("testPos", testPos); // create it
+
 
     }
 
@@ -158,6 +163,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("Pivot Velo", getVelocity().in(Units.DegreesPerSecond));
         SmartDashboard.putNumber("Pivot Accel", getAcceleration().in(Units.DegreesPerSecondPerSecond));
+        testPos = SmartDashboard.getNumber("testPos",0);
+        SmartDashboard.putNumber("testPos", testPos);
+        
 
 
     }

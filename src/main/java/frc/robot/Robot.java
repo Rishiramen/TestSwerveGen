@@ -4,10 +4,13 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degree;
+
 import java.util.Optional;
 
 import com.ctre.phoenix6.HootAutoReplay;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.cameraserver.CameraServer;
@@ -120,15 +123,15 @@ public class Robot extends TimedRobot {
         m_timeAndJoystickReplay.update();
         CommandScheduler.getInstance().run();
         SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
-        SmartDashboard.putBoolean("Is Active", isHubActive());
-        SmartDashboard.putNumber("Countdown to Hub Change", getTimeToNextHubChange(DriverStation.getMatchTime()));
-        SmartDashboard.putNumber("Left y", m_robotContainer.joystick.getLeftY());
-        SmartDashboard.putNumber("Left x", m_robotContainer.joystick.getLeftX());
-        SmartDashboard.putNumber("Left trig", m_robotContainer.joystick.getL2Axis());
-        SmartDashboard.putNumber("Right trig", m_robotContainer.joystick.getR2Axis());
-        SmartDashboard.putNumber("right x", m_robotContainer.joystick.getRightX());
-        SmartDashboard.putNumber("sum trig", Math.abs(
-                (m_robotContainer.joystick.getL2Axis() + 1) / 2 - (m_robotContainer.joystick.getR2Axis() + 1) / 2));
+        // SmartDashboard.putBoolean("Is Active", isHubActive());
+        // SmartDashboard.putNumber("Countdown to Hub Change", getTimeToNextHubChange(DriverStation.getMatchTime()));
+        // SmartDashboard.putNumber("Left y", m_robotContainer.joystick.getLeftY());
+        // SmartDashboard.putNumber("Left x", m_robotContainer.joystick.getLeftX());
+        // SmartDashboard.putNumber("Left trig", m_robotContainer.joystick.getL2Axis());
+        // SmartDashboard.putNumber("Right trig", m_robotContainer.joystick.getR2Axis());
+        // SmartDashboard.putNumber("right x", m_robotContainer.joystick.getRightX());
+        // SmartDashboard.putNumber("sum trig", Math.abs(
+        //         (m_robotContainer.joystick.getL2Axis() + 1) / 2 - (m_robotContainer.joystick.getR2Axis() + 1) / 2));
         SmartDashboard.putNumber("dist from goal", (m_robotContainer.drivetrain.getStateCopy().Pose.getTranslation()
                 .getDistance(CommandSwerveDrivetrain.goalPose2d)));
         DogLog.log("roboPose", m_robotContainer.drivetrain.getStateCopy().Pose);
@@ -177,20 +180,30 @@ public class Robot extends TimedRobot {
         m_robotContainer.shooterSubsystem.fixed = true;
 
     }
-
-    @Override
-    public void teleopPeriodic() {
-        var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-back");
+    public void readAprilTag(){
+    SwerveDriveState state =m_robotContainer.drivetrain.getStateCopy();
+        LimelightHelpers.SetRobotOrientation("limelight-back", state.Pose.getRotation().getDegrees(),
+            state.Speeds.omegaRadiansPerSecond,
+            m_robotContainer.drivetrain.getRotation3d().getMeasureY().in(Degree),
+            m_robotContainer.drivetrain.getPigeon2().getAngularVelocityYWorld().getValueAsDouble(),
+            m_robotContainer.drivetrain.getRotation3d().getMeasureX().in(Degree),
+            m_robotContainer.drivetrain.getPigeon2().getAngularVelocityXWorld().getValueAsDouble());
+        var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-back");
         if (llMeasurement != null && llMeasurement.tagCount > 0
                 && Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0) {
             m_robotContainer.drivetrain.addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
         }
-        SmartDashboard.putNumber("ll tag count", llMeasurement.tagCount);
-        boolean[] boolArr = { llMeasurement != null, llMeasurement.tagCount > 0,
-                Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0 };
+        // SmartDashboard.putNumber("ll tag count", llMeasurement.tagCount);
+        // boolean[] boolArr = { llMeasurement != null, llMeasurement.tagCount > 0,
+        //         Math.abs(m_robotContainer.drivetrain.getStateCopy().Speeds.omegaRadiansPerSecond) < 2.0 };
 
-        SmartDashboard.putBooleanArray("ll mount", boolArr);
+        // SmartDashboard.putBooleanArray("ll mount", boolArr);
 
+    }
+
+    @Override
+    public void teleopPeriodic() {
+        readAprilTag();
         m_robotContainer.shooterSubsystem.incrementOffset(
                 (m_robotContainer.joystick2.getR2Axis() + 1) / 2 - (m_robotContainer.joystick2.getL2Axis() + 1) / 2);
 

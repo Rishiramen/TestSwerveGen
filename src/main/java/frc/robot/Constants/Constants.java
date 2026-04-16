@@ -6,16 +6,17 @@ public class Constants {
     public static InterpolatingDoubleTreeMap metersToRPM = new InterpolatingDoubleTreeMap();
     
     static {
-        metersToRPM.put(0.05, 2000.0);
-        metersToRPM.put(2.65, 2700.0);
-        metersToRPM.put(1.87, 2270.0);
-        metersToRPM.put(2.35, 2550.0);
-        metersToRPM.put(3.4, 2750.0);
-        metersToRPM.put(3.6, 2850.0);
-        metersToRPM.put(5.1, 4400.0);
-        metersToRPM.put(3.0, 2900.0);
-        metersToRPM.put(4.0, 3450.0);
-        metersToRPM.put(2.0, 2500.0);
+        metersToRPM.put(0.05, 3000.0);
+        metersToRPM.put(2.65, 4700.0);
+        metersToRPM.put(1.87, 3800.0);
+        metersToRPM.put(2.446, 4450.0);
+        metersToRPM.put(2.35, 4430.0);
+        metersToRPM.put(3.4, 5000.0);
+        metersToRPM.put(3.6, 5150.0);
+        metersToRPM.put(5.1, 5700.0);
+        metersToRPM.put(3.0, 4800.0);
+        metersToRPM.put(4.0, 5450.0);
+        metersToRPM.put(2.0, 4000.0);
     }
 
     public static double getRPM(double meters)

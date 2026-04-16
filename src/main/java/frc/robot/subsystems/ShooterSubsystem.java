@@ -39,14 +39,14 @@ public class ShooterSubsystem extends SubsystemBase {
     private TalonFX leftShooter, rightShooter;
     // private bangbangCommand bang;
     private double targetRPM = 0.0;
-    private final double stationaryRPM = 2800;
+    private final double stationaryRPM = 4800;
     private double rpmInc = 200/50; // 50 hz looptimes, 200rpm/s
     private double rpmOffset = 0.0;
     private CommandSwerveDrivetrain drivetrain;
     public boolean fixed = false;
     public boolean on = false;
     private final SysIdRoutine sysIdRoutine;
-    private final VelocityVoltage flywheelVelocity = new VelocityVoltage(0).withEnableFOC(true);
+    private final VelocityVoltage flywheelVelocity = new VelocityVoltage(0).withEnableFOC(false);
     private final ProjectileCalculations calc = new ProjectileCalculations(Math.toRadians(20));
 
     public ShooterSubsystem(CommandSwerveDrivetrain drivetrain) {
@@ -62,12 +62,13 @@ public class ShooterSubsystem extends SubsystemBase {
                 .withMotorOutput(new MotorOutputConfigs()
                         .withInverted(InvertedValue.CounterClockwise_Positive)
                         .withNeutralMode(NeutralModeValue.Coast));
-        shooter.Slot0.kP = 0.50; 
+                
+        shooter.Slot0.kP = 0.37; 
         shooter.Slot0.kI = 0.0;
         shooter.Slot0.kD = 0.0;
-        shooter.Slot0.kS = 0.25;
+        shooter.Slot0.kS = 0.2;
         shooter.Slot0.kG = 0.0;
-        shooter.Slot0.kV = 1.0 / 8.35; // 1.0 V per 8.35 RPS; might run a little high at high RPS
+        shooter.Slot0.kV = 1.0 / 8.35 -.005; // 1.0 V per 8.35 RPS; might run a little high at high RPS
         shooter.Slot0.kA = 0.0;
 
 
@@ -112,11 +113,11 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("fixed", fixed);
         SmartDashboard.putBoolean("on", on);
 
-        //double distance = drivetrain.getDistFromGoal().in(Meter);
-        //targetRPM = (!fixed) ? calc.distanceToRPM(distance) : stationaryRPM; targetRPM += rpmOffset;
+        double distance = drivetrain.getDistFromGoal().in(Meter);
+        targetRPM = (!fixed) ? calc.distanceToRPM(distance) : stationaryRPM; targetRPM += rpmOffset;
     
 
-        targetRPM = ((!fixed) ? Constants.getRPM(drivetrain.getDistFromGoal().in(Meter)) : stationaryRPM) + rpmOffset;
+        // targetRPM = ((!fixed) ? Constants.getRPM(drivetrain.getDistFromGoal().in(Meter)) : stationaryRPM) + rpmOffset;
         // targetRPM = SmartDashboard.getNumber("targetRPM",(!fixed) ? Constants.getRPM(drivetrain.getDistFromGoal().in(Meter)) : stationaryRPM) + rpmOffset;
         SmartDashboard.putNumber("targetRPM", targetRPM);
         SmartDashboard.putString("shooter Command", getCurrentCommand() == null ? "null" : getCurrentCommand().getName());

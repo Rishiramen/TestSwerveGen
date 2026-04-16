@@ -326,7 +326,7 @@ private void configureAutoBuilder() {
     private final Translation2d blueGoal = new Translation2d(4.03 + Meter.convertFrom(47 / 2, Inch), 8.07 / 2
                 );
 
-    private final Translation2d redGoal = new Translation2d(16.513 - 4.03 - Meter.convertFrom(47 / 2, Inch), 8.07 / 2+.6
+    private final Translation2d redGoal = new Translation2d(16.513 - 4.03 - Meter.convertFrom(47 / 2, Inch), 8.07 / 2
                 );
 // 0.5969
     public static Translation2d goalPose2d = new Translation2d(0,0);
