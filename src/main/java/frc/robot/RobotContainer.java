@@ -9,7 +9,7 @@ import static edu.wpi.first.units.Units.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-import org.ironmaple.simulation.IntakeSimulation.IntakeSide;
+//import org.ironmaple.simulation.IntakeSimulation.IntakeSide;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
