@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
@@ -158,6 +159,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         
         configureAutoBuilder();
 
+        this.optimizeBusUtilization();
+
 
     }
     public void updateGoalPose(){
@@ -190,7 +193,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         configureAutoBuilder();
 
+        this.optimizeBusUtilization();
+
+
     }
+
+    
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.

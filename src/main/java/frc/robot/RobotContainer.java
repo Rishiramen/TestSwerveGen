@@ -146,12 +146,11 @@ public class RobotContainer {
 
 
                 boolean useShooter = false;
-                boolean useIntake = false;
-                boolean useHopper = false;
+                boolean useIntake = true;
+                boolean useHopper = true;
                 boolean useHang = false;
 
-
-
+                
                 NamedCommands.registerCommand("start hopper", useHopper&&useShooter ? hopperSubsystem.runBackward().raceWith(new WaitCommand(.1)) : new InstantCommand());
                 
                 NamedCommands.registerCommand("stop hopper", useHopper&&useShooter ? hopperSubsystem.stop().raceWith(new WaitCommand(.1)) : new InstantCommand());

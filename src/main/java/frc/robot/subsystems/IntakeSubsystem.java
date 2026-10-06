@@ -34,7 +34,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private State state = State.STOWED;
 
-    private Angle START_HORIZONTAL_OFFSET = Degree.of(85);
+    private Angle START_HORIZONTAL_OFFSET = Degree.of(135);
     public static final double WRIST_RATIO = 1.0/25.0*(12/32.0);
     public static double testPos= 15;
 

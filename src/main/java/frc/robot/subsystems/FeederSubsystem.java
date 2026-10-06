@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -29,6 +30,7 @@ public class FeederSubsystem extends SubsystemBase {
                         .withNeutralMode(NeutralModeValue.Brake));
 
         feeder.getConfigurator().apply(tr);
+
     }
 
     @Override
